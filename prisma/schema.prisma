@@ -1,0 +1,211 @@
+// Prisma Schema for MTK NEWS (SQLite provider for seamless local execution)
+// Switchable to PostgreSQL anytime via DATABASE_URL or schema.postgresql.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String            @id @default(cuid())
+  name         String
+  email        String            @unique
+  passwordHash String
+  role         String            @default("AUTHOR") // ADMIN, EDITOR, AUTHOR
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  articles     Article[]
+  revisions    ArticleRevision[]
+  auditLogs    AuditLog[]
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String?
+  imageUrl    String?
+  parentId    String?
+  parent      Category?    @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[]   @relation("CategoryHierarchy")
+  sortOrder   Int          @default(0)
+  isActive    Boolean      @default(true)
+  articles    Article[]
+  sources     NewsSource[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Article {
+  id              String            @id @default(cuid())
+  title           String
+  subtitle        String?
+  slug            String            @unique
+  excerpt         String?
+  content         String
+  featuredImage   String?
+  imageCaption    String?
+  imageSource     String?
+  authorId        String?
+  author          User?             @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id])
+  status          String            @default("DRAFT") // DRAFT, PENDING, PUBLISHED, SCHEDULED, ARCHIVED
+  sourceType      String            @default("ORIGINAL") // ORIGINAL, IMPORTED, CITATION
+  sourceUrl       String?
+  sourceName      String?
+  seoTitle        String?
+  seoDescription  String?
+  isFeatured      Boolean           @default(false)
+  views           Int               @default(0)
+  publishedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  revisions       ArticleRevision[]
+  scrapedArticles ScrapedArticle[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([isFeatured])
+}
+
+model NewsSource {
+  id                     String           @id @default(cuid())
+  name                   String
+  homepageUrl            String
+  feedUrl                String?
+  sitemapUrl             String?
+  defaultCategoryId      String?
+  defaultCategory        Category?        @relation(fields: [defaultCategoryId], references: [id], onDelete: SetNull)
+  pollingIntervalMinutes Int              @default(30)
+  scrapeMode             String           @default("EDITORIAL_QUEUE") // CITATION, EDITORIAL_QUEUE, AUTO_PUBLISH
+  isActive               Boolean          @default(true)
+  lastCheckedAt          DateTime?
+  lastSuccessAt          DateTime?
+  lastError              String?
+  checkpoint             String?
+  customSelectors        String?          // JSON format: { "title": "...", "content": "..." }
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  scrapedArticles        ScrapedArticle[]
+  jobs                   ScrapeJob[]
+  logs                   ScrapeLog[]
+
+  @@index([isActive])
+}
+
+model ScrapedArticle {
+  id                 String      @id @default(cuid())
+  sourceId           String
+  source             NewsSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  canonicalUrl       String?
+  originalUrl        String
+  title              String
+  excerpt            String?
+  extractedContent   String?
+  sourceAuthor       String?
+  sourcePublishedAt  DateTime?
+  sourceUpdatedAt    DateTime?
+  imageUrl           String?
+  imageCaption       String?
+  contentHash        String?
+  processingStatus   String      @default("PENDING") // PENDING, IMPORTED, DUPLICATE, FAILED, PUBLISHED, IGNORED
+  permissionStatus   String      @default("PENDING") // PENDING, VERIFIED, CITATION_ONLY, RESTRICTED
+  linkedArticleId    String?
+  linkedArticle      Article?    @relation(fields: [linkedArticleId], references: [id], onDelete: SetNull)
+  discoveredAt       DateTime    @default(now())
+  processedAt        DateTime?
+
+  @@index([sourceId])
+  @@index([originalUrl])
+  @@index([contentHash])
+  @@index([processingStatus])
+}
+
+model ScrapeJob {
+  id              String      @id @default(cuid())
+  sourceId        String
+  source          NewsSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status          String      @default("RUNNING") // RUNNING, COMPLETED, FAILED
+  startedAt       DateTime    @default(now())
+  finishedAt      DateTime?
+  discoveredCount Int         @default(0)
+  importedCount   Int         @default(0)
+  duplicateCount  Int         @default(0)
+  failedCount     Int         @default(0)
+  errorSummary    String?
+  logs            ScrapeLog[]
+
+  @@index([sourceId])
+}
+
+model ScrapeLog {
+  id        String      @id @default(cuid())
+  sourceId  String?
+  source    NewsSource? @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  jobId     String?
+  job       ScrapeJob?  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  level     String      @default("INFO") // INFO, WARN, ERROR
+  message   String
+  details   String?
+  createdAt DateTime    @default(now())
+
+  @@index([sourceId])
+  @@index([jobId])
+  @@index([level])
+}
+
+model Media {
+  id            String   @id @default(cuid())
+  storageUrl    String
+  originalUrl   String?
+  mimeType      String
+  fileSize      Int
+  width         Int?
+  height        Int?
+  altText       String?
+  caption       String?
+  sourceName    String?
+  licenseStatus String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
+
+model ArticleRevision {
+  id              String   @id @default(cuid())
+  articleId       String
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  editorId        String?
+  editor          User?    @relation(fields: [editorId], references: [id], onDelete: SetNull)
+  previousContent String
+  newContent      String
+  createdAt       DateTime @default(now())
+
+  @@index([articleId])
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType])
+}
