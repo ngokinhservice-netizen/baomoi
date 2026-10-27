@@ -31,10 +31,64 @@ async function handleCronScrape(req: NextRequest) {
 
     const now = new Date();
 
-    // Find active sources
-    const activeSources = await prisma.newsSource.findMany({
+    // Auto-bootstrap categories and news sources if database is freshly created
+    let activeSources = await prisma.newsSource.findMany({
       where: { isActive: true },
     });
+
+    if (activeSources.length === 0) {
+      // 1. Categories
+      const categoriesData = [
+        { name: "Thời sự", slug: "thoi-su", description: "Tin tức chính trị, xã hội, sự kiện nổi bật trong nước", sortOrder: 1 },
+        { name: "Thế giới", slug: "the-gioi", description: "Thời sự quốc tế, phân tích chiến lược toàn cầu", sortOrder: 2 },
+        { name: "Kinh doanh", slug: "kinh-doanh", description: "Kinh tế vĩ mô, thị trường tài chính, chứng khoán", sortOrder: 3 },
+        { name: "Công nghệ", slug: "cong-nghe", description: "Trí tuệ nhân tạo, thiết bị số, chuyển đổi số", sortOrder: 4 },
+        { name: "Giáo dục", slug: "giao-duc", description: "Chính sách giáo dục, tuyển sinh, hướng nghiệp", sortOrder: 5 },
+        { name: "Đời sống", slug: "doi-song", description: "Sức khỏe, gia đình, ẩm thực, du lịch", sortOrder: 6 },
+        { name: "Thể thao", slug: "the-thao", description: "Bóng đá Việt Nam, Ngoại hạng Anh, thể thao", sortOrder: 7 },
+        { name: "Giải trí", slug: "giai-tri", description: "Điện ảnh, âm nhạc, nghệ thuật và văn hóa", sortOrder: 8 },
+      ];
+
+      const catMap: Record<string, string> = {};
+      for (const cat of categoriesData) {
+        const c = await prisma.category.upsert({
+          where: { slug: cat.slug },
+          update: {},
+          create: { ...cat, isActive: true },
+        });
+        catMap[cat.slug] = c.id;
+      }
+
+      // 2. VnExpress Feeds with AUTO_PUBLISH mode
+      const feeds = [
+        { name: "VnExpress - Thời sự", feedUrl: "https://vnexpress.net/rss/thoi-su.rss", home: "https://vnexpress.net/thoi-su", slug: "thoi-su" },
+        { name: "VnExpress - Tin mới nhất", feedUrl: "https://vnexpress.net/rss/tin-moi-nhat.rss", home: "https://vnexpress.net", slug: "thoi-su" },
+        { name: "VnExpress - Thế giới", feedUrl: "https://vnexpress.net/rss/the-gioi.rss", home: "https://vnexpress.net/the-gioi", slug: "the-gioi" },
+        { name: "VnExpress - Kinh doanh", feedUrl: "https://vnexpress.net/rss/kinh-doanh.rss", home: "https://vnexpress.net/kinh-doanh", slug: "kinh-doanh" },
+        { name: "VnExpress - Số hóa Công nghệ", feedUrl: "https://vnexpress.net/rss/so-hoa.rss", home: "https://vnexpress.net/so-hoa", slug: "cong-nghe" },
+        { name: "VnExpress - Giáo dục", feedUrl: "https://vnexpress.net/rss/giao-duc.rss", home: "https://vnexpress.net/giao-duc", slug: "giao-duc" },
+        { name: "VnExpress - Đời sống", feedUrl: "https://vnexpress.net/rss/gia-dinh.rss", home: "https://vnexpress.net/gia-dinh", slug: "doi-song" },
+        { name: "VnExpress - Thể thao", feedUrl: "https://vnexpress.net/rss/the-thao.rss", home: "https://vnexpress.net/the-thao", slug: "the-thao" },
+        { name: "VnExpress - Giải trí", feedUrl: "https://vnexpress.net/rss/giai-tri.rss", home: "https://vnexpress.net/giai-tri", slug: "giai-tri" },
+      ];
+
+      for (const f of feeds) {
+        if (!catMap[f.slug]) continue;
+        await prisma.newsSource.create({
+          data: {
+            name: f.name,
+            homepageUrl: f.home,
+            feedUrl: f.feedUrl,
+            defaultCategoryId: catMap[f.slug],
+            scrapeMode: "AUTO_PUBLISH",
+            pollingIntervalMinutes: 15,
+            isActive: true,
+          },
+        });
+      }
+
+      activeSources = await prisma.newsSource.findMany({ where: { isActive: true } });
+    }
 
     const sourcesDueForScraping = activeSources.filter((source) => {
       if (!source.lastCheckedAt) return true;
