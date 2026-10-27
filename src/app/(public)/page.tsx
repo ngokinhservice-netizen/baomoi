@@ -9,12 +9,13 @@ import {
   getMostReadArticles,
   getArticlesByCategory,
 } from "@/lib/data";
+import { syncAllLocalDataToDatabase } from "@/lib/importData";
 import { Sparkles, Newspaper, Flame, BookmarkCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [
+  let [
     featuredArticles,
     latestArticles,
     mostReadArticles,
@@ -39,6 +40,40 @@ export default async function HomePage() {
     getArticlesByCategory("the-thao", 4),
     getArticlesByCategory("giai-tri", 4),
   ]);
+
+  // If database is brand new and empty, auto-sync all 525 articles on first load
+  if (latestArticles.length === 0) {
+    try {
+      await syncAllLocalDataToDatabase();
+      [
+        featuredArticles,
+        latestArticles,
+        mostReadArticles,
+        thoiSuArticles,
+        theGioiArticles,
+        kinhDoanhArticles,
+        congNgheArticles,
+        giaoDucArticles,
+        doiSongArticles,
+        theThaoArticles,
+        giaiTriArticles,
+      ] = await Promise.all([
+        getFeaturedArticles(5),
+        getLatestArticles(8),
+        getMostReadArticles(5),
+        getArticlesByCategory("thoi-su", 4),
+        getArticlesByCategory("the-gioi", 4),
+        getArticlesByCategory("kinh-doanh", 4),
+        getArticlesByCategory("cong-nghe", 4),
+        getArticlesByCategory("giao-duc", 4),
+        getArticlesByCategory("doi-song", 4),
+        getArticlesByCategory("the-thao", 4),
+        getArticlesByCategory("giai-tri", 4),
+      ]);
+    } catch (e) {
+      console.warn("Auto-sync database note:", e);
+    }
+  }
 
   const heroArticle = featuredArticles[0] || latestArticles[0];
   const secondaryFeatured = featuredArticles.slice(1, 4);
