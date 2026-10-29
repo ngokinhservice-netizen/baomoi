@@ -4,8 +4,8 @@ import { ChevronRight, Mail, Phone, MapPin, Send } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Liên hệ tòa soạn | MTK NEWS",
-  description: "Thông tin liên hệ tòa soạn, gửi bài cộng tác và đường dây nóng MTK NEWS.",
+  title: "Liên hệ tòa soạn | TOÀN CẢNH 24H",
+  description: "Thông tin liên hệ tòa soạn, gửi bài cộng tác và đường dây nóng TOÀN CẢNH 24H.",
 };
 
 export default function ContactPage() {
@@ -21,7 +21,7 @@ export default function ContactPage() {
         <div className="md:col-span-5 space-y-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-2">
-              Liên Hệ MTK NEWS
+              Liên Hệ TOÀN CẢNH 24H
             </h1>
             <p className="text-sm text-gray-600">
               Mọi ý kiến đóng góp, tin tức độc giả cung cấp hoặc liên hệ phát hành vui lòng kết nối với chúng tôi.
@@ -33,7 +33,7 @@ export default function ContactPage() {
               <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-gray-900">Trụ sở tòa soạn:</p>
-                <p>Tòa nhà MTK Media Tower, Quận 1, TP. Hồ Chí Minh</p>
+                <p>Tòa nhà Báo chí & Truyền thông, Quận 1, TP. Hồ Chí Minh</p>
               </div>
             </div>
 
@@ -49,7 +49,7 @@ export default function ContactPage() {
               <Mail className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-gray-900">Hòm thư điện tử:</p>
-                <p>toasoan@mtknews.vn / bandoc@mtknews.vn</p>
+                <p>toasoan@toancanh24h.io.vn / bandoc@toancanh24h.io.vn</p>
               </div>
             </div>
           </div>

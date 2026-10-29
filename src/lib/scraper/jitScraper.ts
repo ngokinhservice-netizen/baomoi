@@ -26,6 +26,11 @@ const FEEDS = [
  * Ensures the news is ALWAYS automatically updated without relying on external cron.
  */
 export function checkAndTriggerAutoScrape() {
+  // Do NOT run during next build / page compilation
+  if (process.env.NEXT_PHASE === "phase-production-build" || process.env.npm_lifecycle_event === "build") {
+    return;
+  }
+
   const now = Date.now();
   if (isScrapingActive || now - lastScrapeTime < SCRAPE_INTERVAL_MS) {
     return; // Already scraping or recently scraped within 10 minutes

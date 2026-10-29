@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     where: { slug: params.slug },
   });
 
-  if (!category) return { title: "Không tìm thấy chuyên mục | MTK NEWS" };
+  if (!category) return { title: "Không tìm thấy chuyên mục | TOÀN CẢNH 24H" };
 
   return {
-    title: `${category.name} | MTK NEWS`,
-    description: category.description || `Tin tức thời sự chuyên mục ${category.name} trên MTK NEWS.`,
+    title: `${category.name} | TOÀN CẢNH 24H`,
+    description: category.description || `Tin tức thời sự chuyên mục ${category.name} trên TOÀN CẢNH 24H.`,
   };
 }
 

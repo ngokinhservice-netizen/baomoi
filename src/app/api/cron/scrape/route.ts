@@ -90,7 +90,9 @@ async function handleCronScrape(req: NextRequest) {
       activeSources = await prisma.newsSource.findMany({ where: { isActive: true } });
     }
 
+    const force = searchParams.get("force") === "true";
     const sourcesDueForScraping = activeSources.filter((source) => {
+      if (force) return true;
       if (!source.lastCheckedAt) return true;
       const elapsedMinutes = (now.getTime() - new Date(source.lastCheckedAt).getTime()) / (1000 * 60);
       return elapsedMinutes >= source.pollingIntervalMinutes;

@@ -10,8 +10,8 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Tìm kiếm tin tức | MTK NEWS",
-  description: "Tìm kiếm các bài viết, sự kiện, thời sự trên Báo điện tử MTK NEWS.",
+  title: "Tìm kiếm tin tức | TOÀN CẢNH 24H",
+  description: "Tìm kiếm các bài viết, sự kiện, thời sự trên Báo điện tử TOÀN CẢNH 24H.",
 };
 
 interface SearchPageProps {
