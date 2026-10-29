@@ -3,6 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  referrer: "no-referrer",
   title: {
     default: "NHỊP SỐNG 247 — Báo Điện Tử Tin Tức & Nhịp Đập Thời Sự 24/7",
     template: "%s | NHỊP SỐNG 247",

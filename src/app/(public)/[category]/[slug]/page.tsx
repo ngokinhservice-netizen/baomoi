@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const url = `/${params.category}/${params.slug}`;
 
   return {
+    referrer: "no-referrer",
     title: `${title} | NHỊP SỐNG 247`,
     description,
     openGraph: {
@@ -64,20 +65,55 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  // JIT Content Hydration: If article has sourceUrl but content is incomplete or short,
+  // fetch the full body and high-res imagery immediately so visitor sees complete article
+  let renderedContent = article.content;
+  if (
+    article.sourceUrl &&
+    (!article.content || article.content.length < 350 || (article.content.startsWith("<h2") && article.content.length < 500))
+  ) {
+    try {
+      const { safeFetch } = await import("@/lib/security");
+      const { extractArticleFromHtml } = await import("@/lib/scraper/htmlParser");
+      const prisma = (await import("@/lib/prisma")).default;
+
+      const res = await safeFetch(article.sourceUrl, { timeoutMs: 4000 });
+      const extracted = extractArticleFromHtml(res.text, article.sourceUrl);
+      if (extracted.extractedContent && extracted.extractedContent.length > (article.content?.length || 0)) {
+        renderedContent = extracted.extractedContent;
+        if (extracted.imageUrl) {
+          article.featuredImage = extracted.imageUrl;
+        }
+        prisma.article
+          .update({
+            where: { id: article.id },
+            data: {
+              content: extracted.extractedContent,
+              featuredImage: extracted.imageUrl || article.featuredImage,
+              excerpt: extracted.excerpt || article.excerpt,
+            },
+          })
+          .catch(() => {});
+      }
+    } catch {
+      // Keep existing content
+    }
+  }
+
   const relatedArticles = await getRelatedArticles(article.categoryId, article.id, 4);
 
   // Resolution & image optimization: ensure featured image is sharpest possible
   let displayFeaturedImage = article.featuredImage;
   const isLowRes = !displayFeaturedImage || /w=(100|120|220|380)(&|$)/.test(displayFeaturedImage);
-  if (isLowRes && article.content) {
-    const highResMatch = article.content.match(/src="([^"]*w=1200[^"]*)"/i) || article.content.match(/src="([^"]*(?:jpg|jpeg|png|webp)[^"]*)"/i);
+  if (isLowRes && renderedContent) {
+    const highResMatch = renderedContent.match(/src="([^"]*w=1200[^"]*)"/i) || renderedContent.match(/src="([^"]*(?:jpg|jpeg|png|webp)[^"]*)"/i);
     if (highResMatch && highResMatch[1]) {
       displayFeaturedImage = highResMatch[1];
     }
   }
 
   // If the article content is a photo essay already including this image, avoid duplicate
-  const isImageInContent = displayFeaturedImage && article.content && article.content.includes(displayFeaturedImage);
+  const isImageInContent = displayFeaturedImage && renderedContent && renderedContent.includes(displayFeaturedImage);
 
   // Schema.org NewsArticle JSON-LD
   const jsonLd = {
@@ -203,7 +239,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         {/* 5. Main Content Body */}
         <div
           className="article-content max-w-none text-gray-800"
-          dangerouslySetInnerHTML={{ __html: article.content }}
+          dangerouslySetInnerHTML={{ __html: renderedContent }}
         />
 
         {/* 6. Source Attribution Card (If imported or citation) */}
