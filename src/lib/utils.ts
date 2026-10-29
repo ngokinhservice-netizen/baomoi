@@ -24,6 +24,20 @@ export function formatDate(date: Date | string | number | null | undefined): str
   return format(d, "dd/MM/yyyy HH:mm", { locale: vi });
 }
 
+/**
+ * Định dạng ngày giờ chi tiết chuẩn theo phong cách VnExpress:
+ * Ví dụ: "Thứ năm, 29/10/2026, 18:19 (GMT+7)"
+ */
+export function formatArticleDate(date: Date | string | number | null | undefined): string {
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  const dayName = format(d, "EEEE", { locale: vi });
+  const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+  const timeStr = format(d, "dd/MM/yyyy, HH:mm", { locale: vi });
+  return `${capitalizedDay}, ${timeStr} (GMT+7)`;
+}
+
 export function formatDateShort(date: Date | string | number | null | undefined): string {
   if (!date) return "";
   const d = new Date(date);

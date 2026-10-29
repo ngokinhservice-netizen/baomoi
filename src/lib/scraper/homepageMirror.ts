@@ -2,12 +2,13 @@ import prisma from "@/lib/prisma";
 import * as cheerio from "cheerio";
 import { safeFetch } from "../security";
 import { extractArticleFromHtml } from "./htmlParser";
+import { fetchRssFeed } from "./rssParser";
 import { normalizeUrl } from "./normalizer";
 import { slugify, cleanArticleTitle } from "../utils";
 
 let isMirrorSyncActive = false;
 let lastMirrorSyncTime = 0;
-const MIRROR_INTERVAL_MS = 3 * 60 * 1000; // 3 phút đồng bộ một lần
+const MIRROR_INTERVAL_MS = 2 * 60 * 1000; // 2 phút đồng bộ một lần
 
 export async function checkAndSyncHomepageMirror() {
   if (
@@ -37,37 +38,27 @@ export async function checkAndSyncHomepageMirror() {
 }
 
 export async function syncVnExpressHomepageMirror() {
+  // 1. Tải HTML trang chủ VnExpress
   const { text: html } = await safeFetch("https://vnexpress.net", { timeoutMs: 8000 });
   const $ = cheerio.load(html);
 
-  // 1. Get Categories Map
+  // 2. Lấy ánh xạ chuyên mục trong database
   const categories = await prisma.category.findMany({ select: { id: true, slug: true } });
   const catMap = new Map<string, string>();
   for (const c of categories) catMap.set(c.slug, c.id);
   const defaultCatId = catMap.get("thoi-su") || Array.from(catMap.values())[0];
 
-  function detectCategory(url: string): string {
-    const u = url.toLowerCase();
-    if (u.includes("/the-gioi")) return catMap.get("the-gioi") || defaultCatId;
-    if (u.includes("/kinh-doanh") || u.includes("/bat-dong-san")) return catMap.get("kinh-doanh") || defaultCatId;
-    if (u.includes("/khoa-hoc") || u.includes("/so-hoa")) return catMap.get("cong-nghe") || defaultCatId;
-    if (u.includes("/giao-duc")) return catMap.get("giao-duc") || defaultCatId;
-    if (u.includes("/gia-dinh") || u.includes("/suc-khoe") || u.includes("/du-lich")) return catMap.get("doi-song") || defaultCatId;
-    if (u.includes("/the-thao")) return catMap.get("the-thao") || defaultCatId;
-    if (u.includes("/giai-tri")) return catMap.get("giai-tri") || defaultCatId;
+  function detectCategory(url: string, extraContext: string = ""): string {
+    const u = (url + " " + extraContext).toLowerCase();
+    if (u.includes("thế giới") || u.includes("/the-gioi")) return catMap.get("the-gioi") || defaultCatId;
+    if (u.includes("kinh doanh") || u.includes("bất động sản") || u.includes("/kinh-doanh") || u.includes("/bat-dong-san")) return catMap.get("kinh-doanh") || defaultCatId;
+    if (u.includes("khoa học") || u.includes("số hóa") || u.includes("công nghệ") || u.includes("/khoa-hoc") || u.includes("/so-hoa")) return catMap.get("cong-nghe") || defaultCatId;
+    if (u.includes("giáo dục") || u.includes("/giao-duc")) return catMap.get("giao-duc") || defaultCatId;
+    if (u.includes("gia đình") || u.includes("sức khỏe") || u.includes("du lịch") || u.includes("đời sống") || u.includes("/gia-dinh") || u.includes("/suc-khoe") || u.includes("/du-lich")) return catMap.get("doi-song") || defaultCatId;
+    if (u.includes("thể thao") || u.includes("/the-thao")) return catMap.get("the-thao") || defaultCatId;
+    if (u.includes("giải trí") || u.includes("/giai-tri")) return catMap.get("giai-tri") || defaultCatId;
     return defaultCatId;
   }
-
-  // Collect articles from VnExpress Homepage
-  const targetArticles: Array<{
-    title: string;
-    url: string;
-    excerpt: string;
-    imageUrl?: string;
-    isHero: boolean;
-    isFeatured: boolean;
-    priorityOrder: number;
-  }> = [];
 
   function extractBestImage($container: cheerio.Cheerio<any>): string | undefined {
     const srcset = $container.find("picture source").attr("data-srcset") || $container.find("picture source").attr("srcset");
@@ -84,7 +75,19 @@ export async function syncVnExpressHomepageMirror() {
     );
   }
 
-  // 2. Extract HERO Article (Tin tiêu điểm lớn nhất đầu trang VnExpress)
+  // 3. Thu thập danh sách bài viết từ trang chủ VnExpress
+  const targetArticles: Array<{
+    title: string;
+    url: string;
+    excerpt: string;
+    imageUrl?: string;
+    isHero: boolean;
+    isFeatured: boolean;
+    priorityOrder: number;
+    rssPublishedAt?: Date;
+  }> = [];
+
+  // 3.1 HERO ARTICLE (Tin tiêu điểm lớn nhất vị trí top trang chủ VnExpress)
   const heroEl = $("article.article-topstory, article.item-news.full-thumb, .wrapper-topstory article").first();
   const heroRawTitle = heroEl.find(".title-news a, h2 a, h3 a").first().text().trim();
   const heroTitle = cleanArticleTitle(heroRawTitle);
@@ -104,7 +107,7 @@ export async function syncVnExpressHomepageMirror() {
     });
   }
 
-  // 3. Extract SUB-TOPSTORIES (Khung tiêu điểm cạnh Hero trên VnExpress)
+  // 3.2 SUB-TOPSTORIES (Khung tiêu điểm cạnh Hero trên VnExpress)
   $(".wrapper-topstory-folder .col-left article.item-news, .col-left.col-small article.item-news").slice(0, 4).each((i, el) => {
     const rawTitle = $(el).find(".title-news a, h2 a, h3 a").first().text().trim();
     const title = cleanArticleTitle(rawTitle);
@@ -125,8 +128,8 @@ export async function syncVnExpressHomepageMirror() {
     }
   });
 
-  // 4. Extract STREAM ARTICLES (Dòng sự kiện mới nhất trên trang chủ VnExpress)
-  $("article.item-news").slice(4, 20).each((i, el) => {
+  // 3.3 STREAM ARTICLES (Dòng sự kiện mới nhất trên trang chủ VnExpress)
+  $("article.item-news").slice(4, 25).each((i, el) => {
     const rawTitle = $(el).find(".title-news a, h2 a, h3 a").first().text().trim();
     const title = cleanArticleTitle(rawTitle);
     const url = $(el).find(".title-news a, h2 a, h3 a").first().attr("href");
@@ -146,21 +149,79 @@ export async function syncVnExpressHomepageMirror() {
     }
   });
 
-  // 5. Reset previous isFeatured flags so ONLY current VnExpress topstories are featured
-  await prisma.article.updateMany({
-    where: { isFeatured: true },
-    data: { isFeatured: false },
-  });
+  // 3.4 Lấy thêm các bài vừa mới xuất bản từ RSS Tin mới nhất để không bỏ sót bài vừa lên
+  try {
+    const latestRss = await fetchRssFeed("https://vnexpress.net/rss/tin-moi-nhat.rss");
+    for (const item of latestRss.slice(0, 8)) {
+      if (item.title && item.originalUrl && !targetArticles.some((a) => a.title === item.title || a.url === item.originalUrl)) {
+        targetArticles.push({
+          title: cleanArticleTitle(item.title),
+          url: item.originalUrl,
+          excerpt: item.excerpt || "",
+          imageUrl: item.imageUrl,
+          isHero: false,
+          isFeatured: false,
+          priorityOrder: 50,
+          rssPublishedAt: item.sourcePublishedAt,
+        });
+      }
+    }
+  } catch {
+    // Không chặn tiến trình nếu RSS tạm thời nghẽn mạng
+  }
 
-  // 6. Process and Upsert each article in order
-  const now = Date.now();
+  // 4. Lấy chi tiết song song theo từng đợt (chunks) để trích xuất ngày giờ chuẩn và nội dung HD
+  const detailedMap = new Map<
+    string,
+    {
+      sourcePublishedAt?: Date;
+      imageUrl?: string;
+      extractedContent?: string;
+      excerpt?: string;
+      categoryBreadcrumb?: string;
+    }
+  >();
+
+  const chunkSize = 4;
+  for (let i = 0; i < targetArticles.length; i += chunkSize) {
+    const chunk = targetArticles.slice(i, i + chunkSize);
+    await Promise.all(
+      chunk.map(async (item) => {
+        const normUrl = normalizeUrl(item.url);
+        try {
+          const detailRes = await safeFetch(normUrl, { timeoutMs: 3800 });
+          const $detail = cheerio.load(detailRes.text);
+          const breadcrumbText = $detail(".breadcrumb li a, .parent_cate, .breadcrumb a")
+            .map((_, el) => $detail(el).text().trim())
+            .get()
+            .join(" ");
+
+          const extracted = extractArticleFromHtml(detailRes.text, normUrl);
+          detailedMap.set(normUrl, {
+            sourcePublishedAt: extracted.sourcePublishedAt || item.rssPublishedAt,
+            imageUrl: extracted.imageUrl,
+            extractedContent: extracted.extractedContent,
+            excerpt: extracted.excerpt,
+            categoryBreadcrumb: breadcrumbText,
+          });
+        } catch {
+          // Dùng dữ liệu cơ bản đã thu thập từ danh sách
+          if (item.rssPublishedAt) {
+            detailedMap.set(normUrl, { sourcePublishedAt: item.rssPublishedAt });
+          }
+        }
+      })
+    );
+  }
+
+  // 5. Cập nhật và lưu trữ vào Database
+  const spotlightIds: string[] = [];
   let count = 0;
 
   for (const item of targetArticles) {
     const normalizedUrl = normalizeUrl(item.url);
-    const categoryId = detectCategory(normalizedUrl);
-    // Hero has the newest timestamp (now), sub-featured stories are strictly ordered descending
-    const simulatedDate = new Date(now - item.priorityOrder * 60 * 1000);
+    const detail = detailedMap.get(normalizedUrl);
+    const categoryId = detectCategory(normalizedUrl, detail?.categoryBreadcrumb);
 
     const existing = await prisma.article.findFirst({
       where: {
@@ -168,45 +229,35 @@ export async function syncVnExpressHomepageMirror() {
       },
     });
 
-    // For featured articles or articles with low-res/short content, fetch high-res detail
-    let fullContent = existing?.content;
-    let fullImg = item.imageUrl;
-    const isExistingLowRes = !existing?.featuredImage || /w=(100|120|220|380)(&|$)/.test(existing.featuredImage);
-    const isExistingShort = !existing?.content || existing.content.length < 300;
+    const fullImg = detail?.imageUrl || item.imageUrl || existing?.featuredImage;
+    const fullContent = detail?.extractedContent || existing?.content || `<p class="lead">${item.excerpt || ""}</p>`;
+    const fullExcerpt = detail?.excerpt || item.excerpt || existing?.excerpt || "Tin tức từ VnExpress";
+    const realPublishedAt = detail?.sourcePublishedAt || existing?.publishedAt || item.rssPublishedAt || new Date();
 
-    if (item.priorityOrder <= 4 || isExistingLowRes || isExistingShort || !existing) {
-      try {
-        const detailRes = await safeFetch(normalizedUrl, { timeoutMs: 3500 });
-        const extracted = extractArticleFromHtml(detailRes.text, normalizedUrl);
-        if (extracted.imageUrl) fullImg = extracted.imageUrl;
-        if (extracted.extractedContent && extracted.extractedContent.length > 100) {
-          fullContent = extracted.extractedContent;
-        }
-      } catch {
-        // Fallback
-      }
-    }
+    let articleId = existing?.id;
 
     if (existing) {
-      await prisma.article.update({
+      const updated = await prisma.article.update({
         where: { id: existing.id },
         data: {
           isFeatured: item.isFeatured,
-          publishedAt: simulatedDate,
-          featuredImage: fullImg || existing.featuredImage,
-          content: fullContent || existing.content,
-          excerpt: item.excerpt || existing.excerpt,
+          publishedAt: detail?.sourcePublishedAt || existing.publishedAt,
+          featuredImage: fullImg,
+          content: fullContent,
+          excerpt: fullExcerpt,
+          categoryId,
         },
       });
+      articleId = updated.id;
     } else {
       const uniqueSlug = `${slugify(item.title)}-${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 100)}`;
-      await prisma.article.create({
+      const created = await prisma.article.create({
         data: {
           title: item.title,
           slug: uniqueSlug,
-          excerpt: item.excerpt || `Tin tức thời sự từ VnExpress`,
-          content: fullContent || `<p class="lead">${item.excerpt || ""}</p>`,
-          featuredImage: fullImg || item.imageUrl,
+          excerpt: fullExcerpt,
+          content: fullContent,
+          featuredImage: fullImg,
           imageCaption: item.title,
           imageSource: "VnExpress",
           categoryId,
@@ -215,12 +266,38 @@ export async function syncVnExpressHomepageMirror() {
           sourceType: "IMPORTED",
           sourceUrl: normalizedUrl,
           sourceName: "VnExpress",
-          publishedAt: simulatedDate,
+          publishedAt: realPublishedAt,
         },
       });
+      articleId = created.id;
+    }
+
+    if (item.isFeatured && articleId) {
+      spotlightIds.push(articleId);
     }
 
     count++;
+  }
+
+  // 6. Ghi nhớ danh sách ID tiêu điểm trang chủ theo đúng thứ tự VnExpress (Hero đầu tiên, tiếp theo là tiêu điểm)
+  if (spotlightIds.length > 0) {
+    await prisma.siteSetting.upsert({
+      where: { key: "homepage_spotlight_article_ids" },
+      update: { value: JSON.stringify(spotlightIds) },
+      create: {
+        key: "homepage_spotlight_article_ids",
+        value: JSON.stringify(spotlightIds),
+      },
+    });
+
+    // Bỏ cờ isFeatured của những bài cũ không còn nằm trong tiêu điểm hiện tại
+    await prisma.article.updateMany({
+      where: {
+        isFeatured: true,
+        id: { notIn: spotlightIds },
+      },
+      data: { isFeatured: false },
+    });
   }
 
   return count;

@@ -68,18 +68,57 @@ export function extractArticleFromHtml(
     $(".author, .byline, [rel='author']").first().text().trim() ||
     undefined;
 
-  // 6. Publication Date
+  // 6. Publication Date (Trích xuất chuẩn xác thời gian đăng bài từ VnExpress và báo chí)
   let sourcePublishedAt: Date | undefined;
-  const rawDate =
-    $('meta[property="article:published_time"]').attr("content") ||
+
+  // 6.1 Check primary meta tags (VnExpress uses meta[name="pubdate"] in ISO-8601 with +07:00)
+  const metaDateStr =
     $('meta[name="pubdate"]').attr("content") ||
+    $('meta[property="article:published_time"]').attr("content") ||
     $('meta[name="publish_date"]').attr("content") ||
-    $("time").attr("datetime") ||
+    $('meta[name="cXenseParse:recs:publishtime"]').attr("content") ||
+    $('meta[property="og:updated_time"]').attr("content") ||
+    $("time[datetime]").first().attr("datetime") ||
     undefined;
 
-  if (rawDate) {
-    const d = new Date(rawDate);
+  if (metaDateStr) {
+    const d = new Date(metaDateStr);
     if (!isNaN(d.getTime())) sourcePublishedAt = d;
+  }
+
+  // 6.2 Check Unix epoch seconds meta tag (VnExpress its_publication)
+  if (!sourcePublishedAt) {
+    const itsPub = $('meta[name="its_publication"]').attr("content");
+    if (itsPub) {
+      const sec = Number(itsPub);
+      if (!isNaN(sec) && sec > 1000000000) {
+        sourcePublishedAt = new Date(sec * 1000);
+      }
+    }
+  }
+
+  // 6.3 Fallback: Parse Vietnamese date string in DOM (e.g. "Thứ năm, 29/10/2026, 18:19 (GMT+7)")
+  if (!sourcePublishedAt) {
+    const rawDateText = $(".header-content .date, span.date, .date-time, span.time, .article__meta time, .author-time .time").first().text().trim();
+    if (rawDateText) {
+      // Pattern: DD/MM/YYYY ... HH:mm
+      const m1 = rawDateText.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})[^\d]+(\d{1,2}):(\d{2})/);
+      if (m1) {
+        const [, day, month, year, hour, min] = m1;
+        const iso = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hour.padStart(2, "0")}:${min.padStart(2, "0")}:00+07:00`;
+        const d = new Date(iso);
+        if (!isNaN(d.getTime())) sourcePublishedAt = d;
+      } else {
+        // Pattern: HH:mm ... DD/MM/YYYY
+        const m2 = rawDateText.match(/(\d{1,2}):(\d{2})[^\d]+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (m2) {
+          const [, hour, min, day, month, year] = m2;
+          const iso = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hour.padStart(2, "0")}:${min.padStart(2, "0")}:00+07:00`;
+          const d = new Date(iso);
+          if (!isNaN(d.getTime())) sourcePublishedAt = d;
+        }
+      }
+    }
   }
 
   // 7. Site Name

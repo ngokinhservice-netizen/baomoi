@@ -35,6 +35,54 @@ export async function getCategories() {
 
 export async function getFeaturedArticles(limit: number = 5) {
   try {
+    // 1. Kiểm tra danh sách thứ tự tiêu điểm trang chủ soi gương chuẩn từ VnExpress
+    const spotlightSetting = await prisma.siteSetting
+      .findUnique({
+        where: { key: "homepage_spotlight_article_ids" },
+      })
+      .catch(() => null);
+
+    if (spotlightSetting?.value) {
+      try {
+        const spotlightIds: string[] = JSON.parse(spotlightSetting.value);
+        if (Array.isArray(spotlightIds) && spotlightIds.length > 0) {
+          const articles = await prisma.article.findMany({
+            where: { id: { in: spotlightIds }, status: "PUBLISHED" },
+            include: {
+              category: { select: { id: true, name: true, slug: true } },
+              author: { select: { name: true } },
+            },
+          });
+
+          const map = new Map(articles.map((a) => [a.id, a]));
+          const sorted = spotlightIds.map((id) => map.get(id)).filter(Boolean) as typeof articles;
+          const deduped = deduplicateArticles(sorted);
+          if (deduped.length >= limit) {
+            return deduped.slice(0, limit);
+          }
+          if (deduped.length > 0) {
+            const existingIds = new Set(deduped.map((a) => a.id));
+            const fillers = await prisma.article.findMany({
+              where: {
+                status: "PUBLISHED",
+                isFeatured: true,
+                id: { notIn: Array.from(existingIds) },
+              },
+              include: {
+                category: { select: { id: true, name: true, slug: true } },
+                author: { select: { name: true } },
+              },
+              orderBy: { publishedAt: "desc" },
+              take: limit - deduped.length,
+            });
+            return deduplicateArticles([...deduped, ...fillers]).slice(0, limit);
+          }
+        }
+      } catch {
+        // Fallback bên dưới
+      }
+    }
+
     const featured = await prisma.article.findMany({
       where: { status: "PUBLISHED", isFeatured: true },
       include: {

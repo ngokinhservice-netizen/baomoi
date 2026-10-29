@@ -82,6 +82,7 @@ export function checkAndTriggerAutoScrape() {
             let fullContent = "";
             let fullExcerpt = item.excerpt;
             let fullImg = item.imageUrl;
+            let pubDate = item.sourcePublishedAt;
 
             try {
               const detailRes = await safeFetch(normalizedUrl, { timeoutMs: 6000 });
@@ -91,6 +92,7 @@ export function checkAndTriggerAutoScrape() {
               }
               if (extracted.excerpt) fullExcerpt = extracted.excerpt;
               if (extracted.imageUrl) fullImg = extracted.imageUrl;
+              if (extracted.sourcePublishedAt) pubDate = extracted.sourcePublishedAt;
             } catch {
               // fallback
             }
@@ -116,7 +118,7 @@ export function checkAndTriggerAutoScrape() {
                 sourceUrl: normalizedUrl,
                 sourceName: "VnExpress",
                 isFeatured: false,
-                publishedAt: item.sourcePublishedAt || new Date(),
+                publishedAt: pubDate || new Date(),
               },
             });
 

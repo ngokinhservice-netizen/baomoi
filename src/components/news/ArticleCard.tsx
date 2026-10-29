@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime, formatArticleDate } from "@/lib/utils";
 import { Clock, ExternalLink } from "lucide-react";
 
 export interface ArticleCardData {
@@ -85,7 +85,7 @@ export default function ArticleCard({
                 <ExternalLink className="w-3 h-3 mr-1" /> Theo {article.sourceName}
               </span>
             )}
-            <span className="flex items-center">
+            <span className="flex items-center" title={formatArticleDate(dateToDisplay)}>
               <Clock className="w-3.5 h-3.5 mr-1 text-gray-400" />
               {formatRelativeTime(dateToDisplay)}
             </span>
@@ -137,7 +137,7 @@ export default function ArticleCard({
             ) : article.author?.name ? (
               <span className="text-gray-500">{article.author.name}</span>
             ) : null}
-            <span className="flex items-center">
+            <span className="flex items-center" title={formatArticleDate(dateToDisplay)}>
               <Clock className="w-3 h-3 mr-1" />
               {formatRelativeTime(dateToDisplay)}
             </span>
@@ -165,7 +165,7 @@ export default function ArticleCard({
           <h4 className="text-sm font-semibold font-serif text-gray-800 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
             <Link href={articleHref}>{article.title}</Link>
           </h4>
-          <span className="text-[11px] text-gray-400 flex items-center mt-1">
+          <span className="text-[11px] text-gray-400 flex items-center mt-1" title={formatArticleDate(dateToDisplay)}>
             <Clock className="w-3 h-3 mr-1" />
             {formatRelativeTime(dateToDisplay)}
           </span>
@@ -205,7 +205,7 @@ export default function ArticleCard({
         </div>
         <div className="flex items-center justify-between text-[11px] text-gray-400 pt-2 border-t border-gray-50">
           <span>{article.sourceName || article.author?.name || "NHỊP SỐNG 247"}</span>
-          <span className="flex items-center">
+          <span className="flex items-center" title={formatArticleDate(dateToDisplay)}>
             <Clock className="w-3 h-3 mr-1" />
             {formatRelativeTime(dateToDisplay)}
           </span>

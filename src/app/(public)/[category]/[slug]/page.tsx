@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/data";
-import { formatDate, formatRelativeTime } from "@/lib/utils";
+import { formatDate, formatArticleDate, formatRelativeTime } from "@/lib/utils";
 import ArticleCard from "@/components/news/ArticleCard";
 import {
   Clock,
@@ -84,6 +84,9 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         if (extracted.imageUrl) {
           article.featuredImage = extracted.imageUrl;
         }
+        if (extracted.sourcePublishedAt) {
+          article.publishedAt = extracted.sourcePublishedAt;
+        }
         prisma.article
           .update({
             where: { id: article.id },
@@ -91,6 +94,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               content: extracted.extractedContent,
               featuredImage: extracted.imageUrl || article.featuredImage,
               excerpt: extracted.excerpt || article.excerpt,
+              ...(extracted.sourcePublishedAt ? { publishedAt: extracted.sourcePublishedAt } : {}),
             },
           })
           .catch(() => {});
@@ -192,7 +196,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               </span>
               <span className="flex items-center text-gray-500">
                 <Clock className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                {formatDate(article.publishedAt || article.createdAt)}
+                {formatArticleDate(article.publishedAt || article.createdAt)}
               </span>
             </div>
 
