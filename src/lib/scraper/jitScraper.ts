@@ -9,9 +9,9 @@ let isScrapingActive = false;
 let lastScrapeTime = 0;
 const SCRAPE_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes throttle
 
-const FEEDS: Array<{ name: string; url: string; slug: string; isFeatured?: boolean }> = [
-  { name: "VnExpress - Tin nổi bật", url: "https://vnexpress.net/rss/tin-noi-bat.rss", slug: "thoi-su", isFeatured: true },
+const FEEDS: Array<{ name: string; url: string; slug: string }> = [
   { name: "VnExpress - Tin mới nhất", url: "https://vnexpress.net/rss/tin-moi-nhat.rss", slug: "thoi-su" },
+  { name: "VnExpress - Tin nổi bật", url: "https://vnexpress.net/rss/tin-noi-bat.rss", slug: "thoi-su" },
   { name: "VnExpress - Thời sự", url: "https://vnexpress.net/rss/thoi-su.rss", slug: "thoi-su" },
   { name: "VnExpress - Thế giới", url: "https://vnexpress.net/rss/the-gioi.rss", slug: "the-gioi" },
   { name: "VnExpress - Kinh doanh", url: "https://vnexpress.net/rss/kinh-doanh.rss", slug: "kinh-doanh" },
@@ -71,12 +71,6 @@ export function checkAndTriggerAutoScrape() {
             });
 
             if (existing) {
-              if (feed.isFeatured && !existing.isFeatured) {
-                await prisma.article.update({
-                  where: { id: existing.id },
-                  data: { isFeatured: true, publishedAt: item.sourcePublishedAt || new Date() },
-                }).catch(() => {});
-              }
               continue;
             }
 
@@ -117,7 +111,7 @@ export function checkAndTriggerAutoScrape() {
                 sourceType: "IMPORTED",
                 sourceUrl: normalizedUrl,
                 sourceName: "VnExpress",
-                isFeatured: feed.isFeatured || false,
+                isFeatured: false,
                 publishedAt: item.sourcePublishedAt || new Date(),
               },
             });

@@ -119,6 +119,13 @@ async function handleCronScrape(req: NextRequest) {
       }
     }
 
+    // Đảm bảo sau khi cào RSS xong, trang chủ luôn soi gương chuẩn xác tuyệt đối theo VnExpress
+    try {
+      await syncVnExpressHomepageMirror();
+    } catch (mErr: any) {
+      console.warn("Lỗi sync mirror trang chủ:", mErr.message);
+    }
+
     return NextResponse.json({
       success: true,
       totalActiveSources: activeSources.length,

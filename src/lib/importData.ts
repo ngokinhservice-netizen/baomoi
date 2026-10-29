@@ -1,6 +1,7 @@
 import prisma from "./prisma";
 import fs from "fs";
 import path from "path";
+import { syncVnExpressHomepageMirror } from "./scraper/homepageMirror";
 
 export async function syncAllLocalDataToDatabase() {
   console.log("=== BẮT ĐẦU ĐỒNG BỘ DỮ LIỆU TỪ LOCAL SANG VERCEL DATABASE ===");
@@ -95,5 +96,12 @@ export async function syncAllLocalDataToDatabase() {
   }
 
   console.log(`🎉 HOÀN THÀNH: Đã đồng bộ ${importedCount} bài báo vào database.`);
+
+  try {
+    await syncVnExpressHomepageMirror();
+  } catch (err: any) {
+    console.warn("Lỗi sync mirror trang chủ sau import:", err.message);
+  }
+
   return importedCount;
 }
