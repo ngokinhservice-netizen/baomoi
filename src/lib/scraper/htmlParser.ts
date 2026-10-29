@@ -91,10 +91,53 @@ export function extractArticleFromHtml(
   // 8. Content Extraction
   // Clean unwanted elements first
   $("script, style, iframe, noscript, nav, footer, header, form, .ads, .advertisement, .banner, .social-share, .comment-box, .related-posts, .box_social, .box-embed, .inner-article, .list_link, .footer-content").remove();
+  $(".neo-pin, .topbar-sticky, .nav-sticky, .social_pin, .social_left, .action_thumb, .width_common.social-com, .title-detail, .myvne_save_for_later").remove();
 
   let extractedContent = "";
   if (customSelectors?.content) {
     extractedContent = $(customSelectors.content).html() || "";
+  }
+
+  // Check if article is a Photo Story / Slideshow (e.g. VnExpress Phóng sự ảnh / Photo story)
+  if (!extractedContent && $(".item_slide_show, .block_thumb_slide_show, .width-detail-photo").length > 0) {
+    const formattedElements: string[] = [];
+    const leadText = $(".description, p.description, .width-detail-photo .description").first().text().trim();
+    if (leadText) {
+      formattedElements.push(`<p class="text-lg font-medium text-gray-700 leading-relaxed mb-6">${leadText}</p>`);
+    }
+
+    const seenImages = new Set<string>();
+    $(".item_slide_show").each((_, el) => {
+      const $slide = $(el);
+      let imgSrc = "";
+
+      const srcset = $slide.find("picture source").attr("data-srcset") || $slide.find("picture source").attr("srcset");
+      if (srcset) {
+        const parts = srcset.split(",").map((s) => s.trim().split(" ")[0]);
+        imgSrc = parts.find((p) => p.includes("w=1200")) || parts[0];
+      }
+
+      if (!imgSrc) {
+        const img = $slide.find("img");
+        imgSrc = img.attr("data-src") || img.attr("src") || "";
+      }
+
+      if (!imgSrc || imgSrc.includes("data:image") || seenImages.has(imgSrc)) return;
+      seenImages.add(imgSrc);
+
+      let caption = $slide.find(".desc_cation, figcaption, p.Normal").first().text().trim();
+      caption = caption.replace(/\s+/g, " ").trim();
+
+      formattedElements.push(`
+<figure class="my-8">
+  <img src="${imgSrc}" alt="${caption || "Hình ảnh bài viết"}" class="w-full rounded-xl shadow-md border border-gray-100 object-cover" loading="lazy" />
+  ${caption ? `<figcaption class="text-sm text-gray-600 text-center mt-2.5 italic font-sans bg-gray-50 p-2.5 rounded-lg border border-gray-100">${caption}</figcaption>` : ""}
+</figure>`);
+    });
+
+    if (formattedElements.length > 0) {
+      extractedContent = formattedElements.join("\n");
+    }
   }
 
   if (!extractedContent) {
@@ -140,10 +183,18 @@ export function extractArticleFromHtml(
             }
           } else if (["h2", "h3", "h4"].includes(tagName)) {
             formattedElements.push(`<${tagName} class="font-bold text-gray-900 mt-6 mb-3">${$el.html()}</${tagName}>`);
-          } else if (tagName === "figure") {
-            const img = $el.find("img");
-            let imgSrc = img.attr("data-src") || img.attr("src") || "";
-            const caption = $el.find("figcaption, .desc_cation, p").text().trim();
+          } else if (tagName === "figure" || (tagName === "table" && $el.hasClass("tplCaption")) || $el.hasClass("fig-picture")) {
+            let imgSrc = "";
+            const srcset = $el.find("picture source").attr("data-srcset") || $el.find("picture source").attr("srcset");
+            if (srcset) {
+              const parts = srcset.split(",").map((s) => s.trim().split(" ")[0]);
+              imgSrc = parts.find((p) => p.includes("w=1200")) || parts[parts.length - 1];
+            }
+            if (!imgSrc) {
+              const img = $el.find("img");
+              imgSrc = img.attr("data-src") || img.attr("data-original") || img.attr("src") || "";
+            }
+            const caption = $el.find("figcaption, .desc_cation, .Image, p").text().trim();
             if (imgSrc) {
               try {
                 imgSrc = new URL(imgSrc, pageUrl).toString();

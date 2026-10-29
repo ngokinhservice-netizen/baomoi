@@ -69,18 +69,28 @@ export async function syncVnExpressHomepageMirror() {
     priorityOrder: number;
   }> = [];
 
+  function extractBestImage($container: cheerio.Cheerio<any>): string | undefined {
+    const srcset = $container.find("picture source").attr("data-srcset") || $container.find("picture source").attr("srcset");
+    if (srcset) {
+      const parts = srcset.split(",").map((s) => s.trim().split(" ")[0]);
+      const high = parts.find((p) => p.includes("w=1200")) || parts.find((p) => p.includes("w=680")) || parts[parts.length - 1];
+      if (high) return high;
+    }
+    return (
+      $container.find("picture img").attr("data-src") ||
+      $container.find("picture img").attr("src") ||
+      $container.find("img").attr("data-src") ||
+      $container.find("img").attr("src")
+    );
+  }
+
   // 2. Extract HERO Article (Tin tiêu điểm lớn nhất đầu trang VnExpress)
   const heroEl = $("article.article-topstory, article.item-news.full-thumb, .wrapper-topstory article").first();
   const heroRawTitle = heroEl.find(".title-news a, h2 a, h3 a").first().text().trim();
   const heroTitle = cleanArticleTitle(heroRawTitle);
   const heroUrl = heroEl.find(".title-news a, h2 a, h3 a").first().attr("href");
   const heroDesc = heroEl.find(".description a, p.description").first().text().trim();
-  const heroImg =
-    heroEl.find("picture source").attr("srcset")?.split(" ")[0] ||
-    heroEl.find("picture img").attr("data-src") ||
-    heroEl.find("picture img").attr("src") ||
-    heroEl.find("img").attr("data-src") ||
-    heroEl.find("img").attr("src");
+  const heroImg = extractBestImage(heroEl);
 
   if (heroTitle && heroUrl) {
     targetArticles.push({
@@ -100,12 +110,7 @@ export async function syncVnExpressHomepageMirror() {
     const title = cleanArticleTitle(rawTitle);
     const url = $(el).find(".title-news a, h2 a, h3 a").first().attr("href");
     const desc = $(el).find(".description a, p.description").first().text().trim();
-    const img =
-      $(el).find("picture source").attr("srcset")?.split(" ")[0] ||
-      $(el).find("picture img").attr("data-src") ||
-      $(el).find("picture img").attr("src") ||
-      $(el).find("img").attr("data-src") ||
-      $(el).find("img").attr("src");
+    const img = extractBestImage($(el));
 
     if (title && url && title !== heroTitle && !targetArticles.some((a) => a.title === title || a.url === url)) {
       targetArticles.push({
@@ -126,11 +131,7 @@ export async function syncVnExpressHomepageMirror() {
     const title = cleanArticleTitle(rawTitle);
     const url = $(el).find(".title-news a, h2 a, h3 a").first().attr("href");
     const desc = $(el).find(".description a, p.description").first().text().trim();
-    const img =
-      $(el).find("picture img").attr("data-src") ||
-      $(el).find("picture img").attr("src") ||
-      $(el).find("img").attr("data-src") ||
-      $(el).find("img").attr("src");
+    const img = extractBestImage($(el));
 
     if (title && url && !targetArticles.some((a) => a.title === title || a.url === url)) {
       targetArticles.push({
@@ -167,45 +168,45 @@ export async function syncVnExpressHomepageMirror() {
       },
     });
 
+    // For featured articles or articles with low-res/short content, fetch high-res detail
+    let fullContent = existing?.content;
+    let fullImg = item.imageUrl;
+    const isExistingLowRes = !existing?.featuredImage || /w=(100|120|220|380)(&|$)/.test(existing.featuredImage);
+    const isExistingShort = !existing?.content || existing.content.length < 300;
+
+    if (item.priorityOrder <= 4 || isExistingLowRes || isExistingShort || !existing) {
+      try {
+        const detailRes = await safeFetch(normalizedUrl, { timeoutMs: 3500 });
+        const extracted = extractArticleFromHtml(detailRes.text, normalizedUrl);
+        if (extracted.imageUrl) fullImg = extracted.imageUrl;
+        if (extracted.extractedContent && extracted.extractedContent.length > 100) {
+          fullContent = extracted.extractedContent;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
     if (existing) {
       await prisma.article.update({
         where: { id: existing.id },
         data: {
           isFeatured: item.isFeatured,
           publishedAt: simulatedDate,
-          featuredImage: item.imageUrl || existing.featuredImage,
+          featuredImage: fullImg || existing.featuredImage,
+          content: fullContent || existing.content,
           excerpt: item.excerpt || existing.excerpt,
         },
       });
     } else {
-      // For new articles, only fetch full detail page for the HERO story if necessary
-      let fullContent = `<p class="lead">${item.excerpt || ""}</p>`;
-      let fullExcerpt = item.excerpt;
-      let fullImg = item.imageUrl;
-
-      if (item.isHero) {
-        try {
-          const detailRes = await safeFetch(normalizedUrl, { timeoutMs: 3500 });
-          const extracted = extractArticleFromHtml(detailRes.text, normalizedUrl);
-          if (extracted.extractedContent && extracted.extractedContent.length > 100) {
-            fullContent = extracted.extractedContent;
-          }
-          if (extracted.excerpt) fullExcerpt = extracted.excerpt;
-          if (extracted.imageUrl) fullImg = extracted.imageUrl;
-        } catch {
-          // Fallback to excerpt
-        }
-      }
-
       const uniqueSlug = `${slugify(item.title)}-${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 100)}`;
-
       await prisma.article.create({
         data: {
           title: item.title,
           slug: uniqueSlug,
-          excerpt: fullExcerpt || `Tin tức thời sự từ VnExpress`,
-          content: fullContent,
-          featuredImage: fullImg,
+          excerpt: item.excerpt || `Tin tức thời sự từ VnExpress`,
+          content: fullContent || `<p class="lead">${item.excerpt || ""}</p>`,
+          featuredImage: fullImg || item.imageUrl,
           imageCaption: item.title,
           imageSource: "VnExpress",
           categoryId,

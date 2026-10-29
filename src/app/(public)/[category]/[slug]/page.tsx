@@ -66,13 +66,26 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
   const relatedArticles = await getRelatedArticles(article.categoryId, article.id, 4);
 
+  // Resolution & image optimization: ensure featured image is sharpest possible
+  let displayFeaturedImage = article.featuredImage;
+  const isLowRes = !displayFeaturedImage || /w=(100|120|220|380)(&|$)/.test(displayFeaturedImage);
+  if (isLowRes && article.content) {
+    const highResMatch = article.content.match(/src="([^"]*w=1200[^"]*)"/i) || article.content.match(/src="([^"]*(?:jpg|jpeg|png|webp)[^"]*)"/i);
+    if (highResMatch && highResMatch[1]) {
+      displayFeaturedImage = highResMatch[1];
+    }
+  }
+
+  // If the article content is a photo essay already including this image, avoid duplicate
+  const isImageInContent = displayFeaturedImage && article.content && article.content.includes(displayFeaturedImage);
+
   // Schema.org NewsArticle JSON-LD
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
     description: article.excerpt || "",
-    image: article.featuredImage ? [article.featuredImage] : [],
+    image: displayFeaturedImage ? [displayFeaturedImage] : [],
     datePublished: article.publishedAt ? new Date(article.publishedAt).toISOString() : new Date().toISOString(),
     dateModified: article.updatedAt ? new Date(article.updatedAt).toISOString() : new Date().toISOString(),
     author: {
@@ -162,14 +175,15 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
           </div>
         )}
 
-        {/* 4. Featured Image & Caption */}
-        {article.featuredImage && (
+        {/* 4. Featured Image & Caption (Omit if already first item in photo essay) */}
+        {displayFeaturedImage && !isImageInContent && (
           <figure className="mb-8">
             <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-gray-100">
               <img
-                src={article.featuredImage}
+                src={displayFeaturedImage}
                 alt={article.imageCaption || article.title}
                 className="w-full h-full object-cover"
+                style={{ imageRendering: "-webkit-optimize-contrast" }}
               />
             </div>
             {(article.imageCaption || article.imageSource) && (
