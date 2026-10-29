@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { runScraperJob } from "@/lib/scraper/engine";
+import { syncVnExpressHomepageMirror } from "@/lib/scraper/homepageMirror";
 
 export async function GET(req: NextRequest) {
   return handleCronScrape(req);
@@ -27,6 +28,13 @@ async function handleCronScrape(req: NextRequest) {
 
     if (!isAuthorized) {
       return NextResponse.json({ error: "Không được phép truy cập cron endpoint." }, { status: 401 });
+    }
+
+    // 1. Luôn đồng bộ chuẩn xác trang chủ VnExpress ngay lập tức (Hero, Tiêu điểm, Dòng sự kiện)
+    try {
+      await syncVnExpressHomepageMirror();
+    } catch (mErr: any) {
+      console.warn("Lỗi sync mirror trang chủ:", mErr.message);
     }
 
     const now = new Date();

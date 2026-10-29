@@ -9,11 +9,15 @@ import {
   getMostReadArticles,
   getArticlesByCategory,
 } from "@/lib/data";
+import { checkAndSyncHomepageMirror } from "@/lib/scraper/homepageMirror";
 import { Sparkles, Newspaper, Flame, BookmarkCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  // Tự động kiểm tra và soi gương trang chủ VnExpress mỗi khi có lượt truy cập (chạy ngầm không làm chậm tải trang)
+  checkAndSyncHomepageMirror().catch(() => {});
+
   const [
     featuredArticles,
     latestArticles,
