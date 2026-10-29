@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, Menu, X, Shield, Clock, Flame, ChevronRight } from "lucide-react";
 import Logo from "@/components/brand/Logo";
+import WeatherWidget from "@/components/widgets/WeatherWidget";
 
 interface CategoryItem {
   id: string;
@@ -25,6 +26,7 @@ const DEFAULT_CATEGORIES: CategoryItem[] = [
   { id: "6", name: "Đời sống", slug: "doi-song" },
   { id: "7", name: "Thể thao", slug: "the-thao" },
   { id: "8", name: "Giải trí", slug: "giai-tri" },
+  { id: "9", name: "Xe", slug: "xe" },
 ];
 
 export default function Header({ categories = DEFAULT_CATEGORIES }: HeaderProps) {
@@ -56,11 +58,13 @@ export default function Header({ categories = DEFAULT_CATEGORIES }: HeaderProps)
       {/* 1. Top bar: Date, Trending, Admin Link */}
       <div className="bg-gray-50 border-b border-gray-200 text-xs text-gray-600 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <span className="flex items-center text-gray-500 font-medium">
               <Clock className="w-3.5 h-3.5 mr-1 text-primary" />
               {currentDate || "NHỊP SỐNG 247 — Cập nhật liên tục 24/7"}
             </span>
+            <span className="text-gray-300">|</span>
+            <WeatherWidget />
             <span className="text-gray-300">|</span>
             <div className="flex items-center space-x-2">
               <span className="inline-flex items-center font-semibold text-primary">
@@ -69,7 +73,7 @@ export default function Header({ categories = DEFAULT_CATEGORIES }: HeaderProps)
               </span>
               <Link
                 href="/search?q=giao+thông"
-                className="hover:text-primary transition-colors truncate max-w-md"
+                className="hover:text-primary transition-colors truncate max-w-sm"
               >
                 Hạ tầng cao tốc bứt phá • Chuyển đổi AI doanh nghiệp
               </Link>
@@ -123,17 +127,20 @@ export default function Header({ categories = DEFAULT_CATEGORIES }: HeaderProps)
         </div>
 
         {/* Action icons / Mobile search toggle */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="md:hidden">
+            <WeatherWidget />
+          </div>
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="md:hidden p-2 text-gray-700 hover:text-primary"
+            className="md:hidden p-1.5 text-gray-700 hover:text-primary"
             aria-label="Tìm kiếm"
           >
             <Search className="w-5 h-5" />
           </button>
           <Link
             href="/admin"
-            className="md:hidden p-2 text-gray-700 hover:text-primary"
+            className="md:hidden p-1.5 text-gray-700 hover:text-primary"
             aria-label="Đăng nhập Admin"
           >
             <Shield className="w-5 h-5 text-primary" />

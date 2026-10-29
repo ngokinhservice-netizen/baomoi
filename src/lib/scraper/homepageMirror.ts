@@ -57,6 +57,7 @@ export async function syncVnExpressHomepageMirror() {
     if (u.includes("gia đình") || u.includes("sức khỏe") || u.includes("du lịch") || u.includes("đời sống") || u.includes("/gia-dinh") || u.includes("/suc-khoe") || u.includes("/du-lich")) return catMap.get("doi-song") || defaultCatId;
     if (u.includes("thể thao") || u.includes("/the-thao")) return catMap.get("the-thao") || defaultCatId;
     if (u.includes("giải trí") || u.includes("/giai-tri")) return catMap.get("giai-tri") || defaultCatId;
+    if (u.includes("xe") || u.includes("ô tô") || u.includes("/oto-xe-may")) return catMap.get("xe") || defaultCatId;
     return defaultCatId;
   }
 
@@ -149,10 +150,14 @@ export async function syncVnExpressHomepageMirror() {
     }
   });
 
-  // 3.4 Lấy thêm các bài vừa mới xuất bản từ RSS Tin mới nhất để không bỏ sót bài vừa lên
+  // 3.4 Lấy thêm các bài vừa mới xuất bản từ RSS Tin mới nhất và RSS Xe để không bỏ sót bài vừa lên
   try {
-    const latestRss = await fetchRssFeed("https://vnexpress.net/rss/tin-moi-nhat.rss");
-    for (const item of latestRss.slice(0, 8)) {
+    const [latestRss, xeRss] = await Promise.all([
+      fetchRssFeed("https://vnexpress.net/rss/tin-moi-nhat.rss").catch(() => []),
+      fetchRssFeed("https://vnexpress.net/rss/oto-xe-may.rss").catch(() => []),
+    ]);
+
+    for (const item of [...latestRss.slice(0, 8), ...xeRss.slice(0, 6)]) {
       if (item.title && item.originalUrl && !targetArticles.some((a) => a.title === item.title || a.url === item.originalUrl)) {
         targetArticles.push({
           title: cleanArticleTitle(item.title),

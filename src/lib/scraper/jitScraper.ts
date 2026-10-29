@@ -20,6 +20,7 @@ const FEEDS: Array<{ name: string; url: string; slug: string }> = [
   { name: "VnExpress - Giải trí", url: "https://vnexpress.net/rss/giai-tri.rss", slug: "giai-tri" },
   { name: "VnExpress - Đời sống", url: "https://vnexpress.net/rss/gia-dinh.rss", slug: "doi-song" },
   { name: "VnExpress - Giáo dục", url: "https://vnexpress.net/rss/giao-duc.rss", slug: "giao-duc" },
+  { name: "VnExpress - Xe", url: "https://vnexpress.net/rss/oto-xe-may.rss", slug: "xe" },
 ];
 
 /**

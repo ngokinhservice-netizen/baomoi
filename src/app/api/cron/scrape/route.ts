@@ -58,6 +58,7 @@ async function handleCronScrape(req: NextRequest) {
         { name: "Đời sống", slug: "doi-song", description: "Sức khỏe, gia đình, ẩm thực, du lịch", sortOrder: 6 },
         { name: "Thể thao", slug: "the-thao", description: "Bóng đá Việt Nam, Ngoại hạng Anh, thể thao", sortOrder: 7 },
         { name: "Giải trí", slug: "giai-tri", description: "Điện ảnh, âm nhạc, nghệ thuật và văn hóa", sortOrder: 8 },
+        { name: "Xe", slug: "xe", description: "Thị trường ô tô, xe máy, xe điện, đánh giá xe", sortOrder: 9 },
       ];
 
       const catMap: Record<string, string> = {};
@@ -82,6 +83,7 @@ async function handleCronScrape(req: NextRequest) {
         { name: "VnExpress - Đời sống", feedUrl: "https://vnexpress.net/rss/gia-dinh.rss", home: "https://vnexpress.net/gia-dinh", slug: "doi-song" },
         { name: "VnExpress - Thể thao", feedUrl: "https://vnexpress.net/rss/the-thao.rss", home: "https://vnexpress.net/the-thao", slug: "the-thao" },
         { name: "VnExpress - Giải trí", feedUrl: "https://vnexpress.net/rss/giai-tri.rss", home: "https://vnexpress.net/giai-tri", slug: "giai-tri" },
+        { name: "VnExpress - Xe", feedUrl: "https://vnexpress.net/rss/oto-xe-may.rss", home: "https://vnexpress.net/oto-xe-may", slug: "xe" },
       ];
 
       for (const f of feeds) {

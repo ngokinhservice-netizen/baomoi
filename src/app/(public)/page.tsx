@@ -2,6 +2,9 @@ import React from "react";
 import Link from "next/link";
 import ArticleCard from "@/components/news/ArticleCard";
 import CategorySection from "@/components/news/CategorySection";
+import VehicleShowcaseSection from "@/components/news/VehicleShowcaseSection";
+import SportsTicker from "@/components/widgets/SportsTicker";
+import MarketWidget from "@/components/widgets/MarketWidget";
 import Sidebar from "@/components/news/Sidebar";
 import {
   getFeaturedArticles,
@@ -30,6 +33,7 @@ export default async function HomePage() {
     doiSongArticles,
     theThaoArticles,
     giaiTriArticles,
+    xeArticles,
   ] = await Promise.all([
     getFeaturedArticles(5),
     getLatestArticles(8),
@@ -42,6 +46,7 @@ export default async function HomePage() {
     getArticlesByCategory("doi-song", 4),
     getArticlesByCategory("the-thao", 4),
     getArticlesByCategory("giai-tri", 4),
+    getArticlesByCategory("xe", 6),
   ]);
 
   const heroArticle = featuredArticles[0] || latestArticles[0];
@@ -81,6 +86,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 1.5. LỊCH THI ĐẤU BÓNG ĐÁ HÔM NAY (WIDGET THỂ THAO CHUẨN VNEXPRESS) */}
+      <SportsTicker />
 
       {/* 2. DÒNG TIN MỚI NHẤT & CỘT PHẢI (SIDEBAR) */}
       <section>
@@ -137,12 +145,18 @@ export default async function HomePage() {
               articles={kinhDoanhArticles}
             />
 
+            {/* TIỆN ÍCH THỊ TRƯỜNG & TÀI CHÍNH (XĂNG DẦU, VÀNG SJC, TIẾT KIỆM) */}
+            <MarketWidget />
+
             {/* 6. CÔNG NGHỆ */}
             <CategorySection
               title="Công nghệ & Đổi mới sáng tạo"
               slug="cong-nghe"
               articles={congNgheArticles}
             />
+
+            {/* KHỐI SHOWCASE CHUYÊN MỤC XE (3 CỘT CHUẨN PHONG CÁCH VNEXPRESS) */}
+            <VehicleShowcaseSection articles={xeArticles} />
 
             {/* 7. GIÁO DỤC */}
             <CategorySection
