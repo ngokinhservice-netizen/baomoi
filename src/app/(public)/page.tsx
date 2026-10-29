@@ -9,7 +9,6 @@ import {
   getMostReadArticles,
   getArticlesByCategory,
 } from "@/lib/data";
-import { syncAllLocalDataToDatabase } from "@/lib/importData";
 import { Sparkles, Newspaper, Flame, BookmarkCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
