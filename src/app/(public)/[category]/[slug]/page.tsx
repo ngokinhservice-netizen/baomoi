@@ -184,6 +184,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                 alt={article.imageCaption || article.title}
                 className="w-full h-full object-cover"
                 style={{ imageRendering: "-webkit-optimize-contrast" }}
+                referrerPolicy="no-referrer"
               />
             </div>
             {(article.imageCaption || article.imageSource) && (

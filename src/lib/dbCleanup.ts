@@ -84,6 +84,43 @@ export async function upgradeImagesAndPhotoStoriesInDb() {
   } catch (err: any) {
     console.warn(`[Image-HD] Lỗi nâng cấp ảnh:`, err.message);
   }
+
+  // 3. Re-extract any articles that have incomplete / empty content (e.g. Dantri articles)
+  try {
+    const shortArticles = await prisma.article.findMany({
+      where: {
+        sourceUrl: { not: null },
+      },
+      select: { id: true, sourceUrl: true, content: true, title: true },
+    });
+
+    const needFullContent = shortArticles.filter(
+      (a) => !a.content || a.content.length < 350 || (a.content.startsWith("<h2") && a.content.length < 500)
+    );
+
+    for (const art of needFullContent) {
+      if (!art.sourceUrl) continue;
+      try {
+        const { text: html } = await safeFetch(art.sourceUrl, { timeoutMs: 5000 });
+        const extracted = extractArticleFromHtml(html, art.sourceUrl);
+        if (extracted.extractedContent && extracted.extractedContent.length > (art.content?.length || 0)) {
+          await prisma.article.update({
+            where: { id: art.id },
+            data: {
+              content: extracted.extractedContent,
+              featuredImage: extracted.imageUrl || undefined,
+              excerpt: extracted.excerpt || undefined,
+            },
+          });
+          console.log(`[Content-Heal] ✅ Đã bổ sung nội dung đầy đủ: "${art.title.slice(0, 35)}"`);
+        }
+      } catch (err: any) {
+        console.warn(`[Content-Heal] Lỗi bổ sung:`, err.message);
+      }
+    }
+  } catch (err: any) {
+    console.warn(`[Content-Heal] Lỗi quét bài thiếu:`, err.message);
+  }
 }
 
 export async function cleanupDuplicateArticlesInDb() {

@@ -130,7 +130,7 @@ export function extractArticleFromHtml(
 
       formattedElements.push(`
 <figure class="my-8">
-  <img src="${imgSrc}" alt="${caption || "Hình ảnh bài viết"}" class="w-full rounded-xl shadow-md border border-gray-100 object-cover" loading="lazy" />
+  <img src="${imgSrc}" alt="${caption || "Hình ảnh bài viết"}" class="w-full rounded-xl shadow-md border border-gray-100 object-cover" loading="lazy" referrerpolicy="no-referrer" />
   ${caption ? `<figcaption class="text-sm text-gray-600 text-center mt-2.5 italic font-sans bg-gray-50 p-2.5 rounded-lg border border-gray-100">${caption}</figcaption>` : ""}
 </figure>`);
     });
@@ -172,9 +172,24 @@ export function extractArticleFromHtml(
           }
         });
 
-        match.children().each((_, el) => {
-          const tagName = (el as any).tagName?.toLowerCase();
-          const $el = $(el);
+        const candidateElements: cheerio.Cheerio<any>[] = [];
+        const directBlocks = match.children("p, figure, h2, h3, h4, blockquote, ul, ol");
+        const allParagraphs = match.find("p");
+
+        if (directBlocks.length >= 3 || allParagraphs.length <= directBlocks.length) {
+          match.children().each((_, el) => {
+            candidateElements.push($(el));
+          });
+        } else {
+          match.find("p, figure, table.tplCaption, div.fig-picture, h2, h3, h4, blockquote, ul, ol").each((_, el) => {
+            const $item = $(el);
+            if ($item.is("p") && $item.closest("figure, figcaption, table").length) return;
+            candidateElements.push($item);
+          });
+        }
+
+        candidateElements.forEach(($el) => {
+          const tagName = ($el[0] as any).tagName?.toLowerCase();
 
           if (tagName === "p") {
             const text = $el.text().trim();
@@ -203,7 +218,7 @@ export function extractArticleFromHtml(
               }
               formattedElements.push(`
                 <figure class="my-6">
-                  <img src="${imgSrc}" alt="${caption}" class="w-full rounded-lg shadow-sm" loading="lazy" />
+                  <img src="${imgSrc}" alt="${caption}" class="w-full rounded-lg shadow-sm" loading="lazy" referrerpolicy="no-referrer" />
                   ${caption ? `<figcaption class="text-xs text-gray-500 text-center mt-2 italic">${caption}</figcaption>` : ""}
                 </figure>
               `);

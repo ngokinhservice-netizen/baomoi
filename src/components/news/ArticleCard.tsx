@@ -58,6 +58,7 @@ export default function ArticleCard({
             alt={article.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             style={{ imageRendering: "-webkit-optimize-contrast" }}
+            referrerPolicy="no-referrer"
             loading="eager"
           />
           {showCategory && article.category && (
@@ -107,6 +108,7 @@ export default function ArticleCard({
             alt={article.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             style={{ imageRendering: "-webkit-optimize-contrast" }}
+            referrerPolicy="no-referrer"
             loading="lazy"
           />
         </Link>
@@ -181,6 +183,7 @@ export default function ArticleCard({
           alt={article.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           style={{ imageRendering: "-webkit-optimize-contrast" }}
+          referrerPolicy="no-referrer"
           loading="lazy"
         />
         {showCategory && article.category && (
