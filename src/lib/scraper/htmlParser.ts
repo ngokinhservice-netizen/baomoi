@@ -236,6 +236,10 @@ export function extractArticleFromHtml(
           if (tagName === "p") {
             const text = $el.text().trim();
             if (text.length > 0) {
+              // Avoid duplicate sapo paragraph if it exactly matches the excerpt
+              if (excerpt && (text === excerpt.trim() || text.replace(/\s+/g, " ") === excerpt.trim().replace(/\s+/g, " "))) {
+                return;
+              }
               formattedElements.push(`<p>${$el.html()}</p>`);
             }
           } else if (["h2", "h3", "h4"].includes(tagName)) {

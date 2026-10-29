@@ -244,10 +244,22 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         )}
 
         {/* 5. Main Content Body */}
-        <div
-          className="article-content max-w-none text-gray-800"
-          dangerouslySetInnerHTML={{ __html: renderedContent }}
-        />
+        {(() => {
+          let cleanedContent = renderedContent;
+          if (article.excerpt && cleanedContent) {
+            const cleanExcerptText = article.excerpt.replace(/\s+/g, " ").trim();
+            cleanedContent = cleanedContent.replace(
+              new RegExp(`^\\s*<p[^>]*>\\s*${cleanExcerptText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*<\\/p>`, "i"),
+              ""
+            );
+          }
+          return (
+            <div
+              className="article-content max-w-none text-gray-800"
+              dangerouslySetInnerHTML={{ __html: cleanedContent }}
+            />
+          );
+        })()}
 
         {/* 6. Source Attribution Card (If imported or citation) */}
         {(article.sourceUrl || article.sourceName) && (
