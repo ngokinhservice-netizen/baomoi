@@ -29,7 +29,7 @@ export default function MarketWidget() {
           <div className="space-y-2">
             {/* Row 1: E10 RON 95-III */}
             <div className="flex items-center justify-between">
-              <span className="font-bold text-white tracking-tight">E10 RON 95-III</span>
+              <span className="font-bold text-white tracking-normal">E10 RON 95-III</span>
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-white text-sm">25.730</span>
                 <span className="text-rose-500 font-bold text-[11px] bg-rose-950/60 px-1.5 py-0.5 rounded">
@@ -41,7 +41,7 @@ export default function MarketWidget() {
 
             {/* Row 2: Dầu diesel */}
             <div className="flex items-center justify-between pt-1 border-t border-neutral-800/80">
-              <span className="font-bold text-white tracking-tight">Dầu diesel</span>
+              <span className="font-bold text-white tracking-normal">Dầu diesel</span>
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-white text-sm">30.240</span>
                 <span className="text-rose-500 font-bold text-[11px] bg-rose-950/60 px-1.5 py-0.5 rounded">
@@ -61,7 +61,7 @@ export default function MarketWidget() {
           <div className="space-y-2">
             {/* Row 1: Vàng thế giới */}
             <div className="flex items-center justify-between">
-              <span className="font-bold text-amber-300 tracking-tight">Vàng thế giới</span>
+              <span className="font-bold text-amber-300 tracking-normal">Vàng thế giới</span>
               <div className="flex items-center space-x-2 text-[11px]">
                 <span className="text-neutral-400">Mua:</span>
                 <span className="font-bold text-white text-sm">4.008,7</span>
@@ -76,7 +76,7 @@ export default function MarketWidget() {
 
             {/* Row 2: Vàng SJC */}
             <div className="flex items-center justify-between pt-1 border-t border-neutral-800/80">
-              <span className="font-bold text-amber-300 tracking-tight">Vàng SJC</span>
+              <span className="font-bold text-amber-300 tracking-normal">Vàng SJC</span>
               <div className="flex items-center space-x-2 text-[11px]">
                 <span className="text-neutral-400">Mua:</span>
                 <span className="font-bold text-white text-sm">139,7</span>

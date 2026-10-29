@@ -240,10 +240,21 @@ export function extractArticleFromHtml(
               if (excerpt && (text === excerpt.trim() || text.replace(/\s+/g, " ") === excerpt.trim().replace(/\s+/g, " "))) {
                 return;
               }
-              formattedElements.push(`<p>${$el.html()}</p>`);
+              let innerHtml = $el.html() || "";
+              // Ensure clean word boundaries around inline tags (e.g. </a>Từ -> </a> Từ, </span>Bộ -> </span> Bộ)
+              innerHtml = innerHtml
+                .replace(/<\/([a-z0-9]+)>([A-Za-zÀ-ỹ0-9])/gi, "</$1> $2")
+                .replace(/([A-Za-zÀ-ỹ0-9])<([a-z0-9]+)([\s>])/gi, "$1 <$2$3")
+                .replace(/&nbsp;/g, " ");
+              formattedElements.push(`<p>${innerHtml}</p>`);
             }
           } else if (["h2", "h3", "h4"].includes(tagName)) {
-            formattedElements.push(`<${tagName} class="font-bold text-gray-900 mt-6 mb-3">${$el.html()}</${tagName}>`);
+            let innerHtml = $el.html() || "";
+            innerHtml = innerHtml
+              .replace(/<\/([a-z0-9]+)>([A-Za-zÀ-ỹ0-9])/gi, "</$1> $2")
+              .replace(/([A-Za-zÀ-ỹ0-9])<([a-z0-9]+)([\s>])/gi, "$1 <$2$3")
+              .replace(/&nbsp;/g, " ");
+            formattedElements.push(`<${tagName} class="font-bold text-gray-900 mt-6 mb-3 leading-[1.45]">${innerHtml}</${tagName}>`);
           } else if (tagName === "figure" || (tagName === "table" && $el.hasClass("tplCaption")) || $el.hasClass("fig-picture") || $el.hasClass("item_slide_show")) {
             let imgSrc = "";
             const srcset = $el.find("picture source").attr("data-srcset") || $el.find("picture source").attr("srcset");

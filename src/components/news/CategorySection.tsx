@@ -21,7 +21,7 @@ export default function CategorySection({ title, slug, articles }: CategorySecti
       <div className="flex items-center justify-between pb-2 mb-4 border-b-2 border-primary">
         <Link
           href={`/danh-muc/${slug}`}
-          className="text-lg md:text-xl font-bold font-serif text-gray-900 hover:text-primary flex items-center transition-colors uppercase tracking-tight"
+          className="text-lg md:text-xl font-bold font-serif text-gray-900 hover:text-primary flex items-center transition-colors uppercase tracking-wide"
         >
           <span className="w-2.5 h-2.5 bg-primary rounded-full mr-2"></span>
           {title}

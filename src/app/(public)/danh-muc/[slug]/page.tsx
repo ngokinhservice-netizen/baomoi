@@ -77,7 +77,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       {/* Category Header */}
       <div className="pb-4 mb-6 border-b-2 border-primary flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 uppercase tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 uppercase tracking-wide">
             {category.name}
           </h1>
           {category.description && (

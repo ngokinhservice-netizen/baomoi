@@ -98,7 +98,7 @@ export default async function HomePage() {
             {/* Tin mới nhất Ticker Grid */}
             <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
               <div className="flex items-center justify-between pb-2 mb-4 border-b-2 border-primary">
-                <h2 className="text-lg md:text-xl font-bold font-serif text-gray-900 flex items-center uppercase tracking-tight">
+                <h2 className="text-lg md:text-xl font-bold font-serif text-gray-900 flex items-center uppercase tracking-wide">
                   <Newspaper className="w-5 h-5 text-primary mr-2" />
                   Dòng thời sự mới nhất
                 </h2>

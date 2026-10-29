@@ -180,18 +180,18 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-serif text-gray-900 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-serif text-gray-900 leading-[1.38] tracking-normal">
             {article.title}
           </h1>
 
           {article.subtitle && (
-            <p className="text-lg text-gray-600 font-medium font-serif leading-snug">
+            <p className="text-lg text-gray-600 font-medium font-serif leading-[1.5] tracking-normal">
               {article.subtitle}
             </p>
           )}
 
           {/* Meta bar: Author, Date, Share */}
-          <div className="flex flex-wrap items-center justify-between text-xs text-gray-500 py-3 border-y border-gray-200 gap-2">
+          <div className="flex flex-wrap items-center justify-between text-xs text-gray-500 py-3.5 border-y border-gray-200 gap-3">
             <div className="flex items-center space-x-4">
               <span className="flex items-center font-semibold text-gray-800">
                 <User className="w-3.5 h-3.5 mr-1 text-primary" />
@@ -213,7 +213,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
         {/* 3. Sapo / Excerpt */}
         {article.excerpt && (
-          <div className="text-base sm:text-lg font-semibold text-gray-800 leading-relaxed bg-gray-50 p-4 rounded-lg border-l-4 border-primary mb-6">
+          <div className="text-base sm:text-lg font-medium text-gray-800 leading-[1.8] bg-gray-50 p-4 sm:p-5 rounded-lg border-l-4 border-primary mb-8 tracking-normal">
             {article.excerpt}
           </div>
         )}
@@ -252,6 +252,12 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               new RegExp(`^\\s*<p[^>]*>\\s*${cleanExcerptText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*<\\/p>`, "i"),
               ""
             );
+          }
+          if (cleanedContent) {
+            cleanedContent = cleanedContent
+              .replace(/<\/([a-z0-9]+)>([A-Za-zÀ-ỹ0-9])/gi, "</$1> $2")
+              .replace(/([A-Za-zÀ-ỹ0-9])<([a-z0-9]+)([\s>])/gi, "$1 <$2$3")
+              .replace(/&nbsp;/g, " ");
           }
           return (
             <div
@@ -305,7 +311,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         {/* 8. Related Articles (Bài viết liên quan) */}
         {relatedArticles.length > 0 && (
           <section className="mt-12 pt-8 border-t-2 border-primary">
-            <h3 className="text-xl font-bold font-serif text-gray-900 mb-6 uppercase tracking-tight">
+            <h3 className="text-xl font-bold font-serif text-gray-900 mb-6 uppercase tracking-wide">
               Bài viết cùng chuyên mục
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">

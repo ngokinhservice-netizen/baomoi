@@ -86,7 +86,7 @@ export default function WeatherWidget() {
         <span className="mx-0.5 text-gray-300">|</span>
         <div className="flex items-center space-x-1 pl-0.5">
           {renderIcon(selectedCity.iconType, "w-4 h-4")}
-          <span className="font-bold text-gray-900 tracking-tight text-xs">
+          <span className="font-bold text-gray-900 tracking-normal text-xs">
             {selectedCity.temp}°C
           </span>
         </div>

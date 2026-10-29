@@ -37,7 +37,7 @@ export default function VehicleShowcaseSection({ articles }: VehicleShowcaseProp
         <div className="flex items-center space-x-3">
           <Link
             href="/danh-muc/xe"
-            className="text-2xl font-bold font-serif text-primary hover:text-red-700 transition-colors uppercase tracking-tight flex items-center"
+            className="text-2xl font-bold font-serif text-primary hover:text-red-700 transition-colors uppercase tracking-wide flex items-center"
           >
             Xe
           </Link>
@@ -79,11 +79,11 @@ export default function VehicleShowcaseSection({ articles }: VehicleShowcaseProp
             </Link>
 
             <div>
-              <h3 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 hover:text-primary transition-colors leading-snug mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 hover:text-primary transition-colors leading-[1.4] tracking-normal mb-2">
                 <Link href={getArticleLink(heroArticle)}>{heroArticle.title}</Link>
               </h3>
               {heroArticle.excerpt && (
-                <p className="text-gray-600 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                <p className="text-gray-600 text-xs sm:text-sm line-clamp-3 leading-relaxed tracking-normal">
                   {heroArticle.excerpt}
                 </p>
               )}
@@ -111,7 +111,7 @@ export default function VehicleShowcaseSection({ articles }: VehicleShowcaseProp
                   loading="lazy"
                 />
               </Link>
-              <h4 className="text-sm font-semibold font-serif text-gray-900 hover:text-primary transition-colors line-clamp-2 leading-snug">
+              <h4 className="text-sm font-semibold font-serif text-gray-900 hover:text-primary transition-colors line-clamp-2 leading-[1.42] tracking-normal">
                 <Link href={getArticleLink(art)}>{art.title}</Link>
               </h4>
             </div>
@@ -123,7 +123,7 @@ export default function VehicleShowcaseSection({ articles }: VehicleShowcaseProp
           {rightArticles.map((art) => (
             <div key={art.id} className="py-2.5 first:pt-0 last:pb-0 flex items-start gap-2.5">
               <div className="flex-1">
-                <h5 className="text-xs sm:text-sm font-medium font-serif text-gray-800 hover:text-primary transition-colors line-clamp-3 leading-snug">
+                <h5 className="text-xs sm:text-sm font-medium font-serif text-gray-800 hover:text-primary transition-colors line-clamp-3 leading-[1.45] tracking-normal">
                   <Link href={getArticleLink(art)}>{art.title}</Link>
                 </h5>
               </div>

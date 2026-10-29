@@ -68,11 +68,11 @@ export default function ArticleCard({
           )}
         </Link>
         <div className="p-5">
-          <h2 className="text-2xl md:text-3xl font-bold font-serif text-gray-900 group-hover:text-primary transition-colors leading-tight mb-3">
+          <h2 className="text-2xl md:text-3xl font-bold font-serif text-gray-900 group-hover:text-primary transition-colors leading-[1.38] tracking-normal mb-3">
             <Link href={articleHref}>{article.title}</Link>
           </h2>
           {article.excerpt && (
-            <p className="text-gray-600 text-sm md:text-base leading-relaxed line-clamp-3 mb-4">
+            <p className="text-gray-600 text-sm md:text-base leading-relaxed tracking-normal line-clamp-3 mb-4">
               {article.excerpt}
             </p>
           )}
@@ -122,11 +122,11 @@ export default function ArticleCard({
                 {article.category.name}
               </Link>
             )}
-            <h3 className="text-base sm:text-lg font-bold font-serif text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+            <h3 className="text-base sm:text-lg font-bold font-serif text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-[1.42] tracking-normal">
               <Link href={articleHref}>{article.title}</Link>
             </h3>
             {article.excerpt && (
-              <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 mt-1.5 leading-relaxed">
+              <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 mt-1.5 leading-relaxed tracking-normal">
                 {article.excerpt}
               </p>
             )}
@@ -162,7 +162,7 @@ export default function ArticleCard({
               {article.category.name}
             </span>
           )}
-          <h4 className="text-sm font-semibold font-serif text-gray-800 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+          <h4 className="text-sm font-semibold font-serif text-gray-800 group-hover:text-primary transition-colors line-clamp-2 leading-[1.42] tracking-normal">
             <Link href={articleHref}>{article.title}</Link>
           </h4>
           <span className="text-[11px] text-gray-400 flex items-center mt-1" title={formatArticleDate(dateToDisplay)}>
@@ -194,11 +194,11 @@ export default function ArticleCard({
       </Link>
       <div className="p-3.5 flex flex-col flex-1 justify-between">
         <div>
-          <h3 className="text-base font-bold font-serif text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-2">
+          <h3 className="text-base font-bold font-serif text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-[1.42] tracking-normal mb-2">
             <Link href={articleHref}>{article.title}</Link>
           </h3>
           {article.excerpt && (
-            <p className="text-gray-600 text-xs line-clamp-2 leading-relaxed mb-3">
+            <p className="text-gray-600 text-xs line-clamp-2 leading-relaxed tracking-normal mb-3">
               {article.excerpt}
             </p>
           )}

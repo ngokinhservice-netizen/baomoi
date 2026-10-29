@@ -40,7 +40,7 @@ export default function Logo({
       <div className="flex flex-col">
         <div className="flex items-baseline space-x-1.5">
           <span
-            className={`font-black tracking-tight text-xl sm:text-2xl font-sans uppercase ${
+            className={`font-black tracking-normal sm:tracking-wide text-xl sm:text-2xl font-sans uppercase ${
               isDark ? "text-white" : "text-gray-900"
             }`}
           >

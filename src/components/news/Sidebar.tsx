@@ -14,7 +14,7 @@ export default function Sidebar({ mostReadArticles = [], latestNews = [] }: Side
       {/* 1. Tin Đọc Nhiều (Ranking 1 - 5) */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
         <div className="flex items-center justify-between pb-2 mb-3 border-b-2 border-primary">
-          <h3 className="text-base font-bold font-serif text-gray-900 flex items-center uppercase tracking-tight">
+          <h3 className="text-base font-bold font-serif text-gray-900 flex items-center uppercase tracking-wide">
             <TrendingUp className="w-4 h-4 text-primary mr-1.5" />
             Đọc nhiều nhất
           </h3>
@@ -39,7 +39,7 @@ export default function Sidebar({ mostReadArticles = [], latestNews = [] }: Side
       {/* 2. Dòng sự kiện / Tin mới nhận */}
       <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between pb-2 mb-3 border-b-2 border-gray-400">
-          <h3 className="text-base font-bold font-serif text-gray-900 flex items-center uppercase tracking-tight">
+          <h3 className="text-base font-bold font-serif text-gray-900 flex items-center uppercase tracking-wide">
             <Radio className="w-4 h-4 text-primary mr-1.5 animate-pulse" />
             Tin mới nhận 24/7
           </h3>
@@ -60,7 +60,7 @@ export default function Sidebar({ mostReadArticles = [], latestNews = [] }: Side
       {/* 3. Chủ đề thịnh hành / Tags */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
         <div className="flex items-center justify-between pb-2 mb-3 border-b-2 border-primary">
-          <h3 className="text-base font-bold font-serif text-gray-900 flex items-center uppercase tracking-tight">
+          <h3 className="text-base font-bold font-serif text-gray-900 flex items-center uppercase tracking-wide">
             <Tag className="w-4 h-4 text-primary mr-1.5" />
             Chủ đề quan tâm
           </h3>
