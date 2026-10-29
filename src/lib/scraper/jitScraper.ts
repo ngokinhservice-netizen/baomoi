@@ -15,7 +15,7 @@ const FEEDS = [
   { name: "VnExpress - Thế giới", url: "https://vnexpress.net/rss/the-gioi.rss", slug: "the-gioi" },
   { name: "VnExpress - Kinh doanh", url: "https://vnexpress.net/rss/kinh-doanh.rss", slug: "kinh-doanh" },
   { name: "VnExpress - Thể thao", url: "https://vnexpress.net/rss/the-thao.rss", slug: "the-thao" },
-  { name: "VnExpress - Số hóa Công nghệ", url: "https://vnexpress.net/rss/so-hoa.rss", slug: "cong-nghe" },
+  { name: "VnExpress - Khoa học Công nghệ", url: "https://vnexpress.net/rss/khoa-hoc-cong-nghe.rss", slug: "cong-nghe" },
   { name: "VnExpress - Giải trí", url: "https://vnexpress.net/rss/giai-tri.rss", slug: "giai-tri" },
   { name: "VnExpress - Đời sống", url: "https://vnexpress.net/rss/gia-dinh.rss", slug: "doi-song" },
   { name: "VnExpress - Giáo dục", url: "https://vnexpress.net/rss/giao-duc.rss", slug: "giao-duc" },

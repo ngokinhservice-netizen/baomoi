@@ -65,7 +65,7 @@ async function handleCronScrape(req: NextRequest) {
         { name: "VnExpress - Tin mới nhất", feedUrl: "https://vnexpress.net/rss/tin-moi-nhat.rss", home: "https://vnexpress.net", slug: "thoi-su" },
         { name: "VnExpress - Thế giới", feedUrl: "https://vnexpress.net/rss/the-gioi.rss", home: "https://vnexpress.net/the-gioi", slug: "the-gioi" },
         { name: "VnExpress - Kinh doanh", feedUrl: "https://vnexpress.net/rss/kinh-doanh.rss", home: "https://vnexpress.net/kinh-doanh", slug: "kinh-doanh" },
-        { name: "VnExpress - Số hóa Công nghệ", feedUrl: "https://vnexpress.net/rss/so-hoa.rss", home: "https://vnexpress.net/so-hoa", slug: "cong-nghe" },
+        { name: "VnExpress - Khoa học Công nghệ", feedUrl: "https://vnexpress.net/rss/khoa-hoc-cong-nghe.rss", home: "https://vnexpress.net/khoa-hoc-cong-nghe", slug: "cong-nghe" },
         { name: "VnExpress - Giáo dục", feedUrl: "https://vnexpress.net/rss/giao-duc.rss", home: "https://vnexpress.net/giao-duc", slug: "giao-duc" },
         { name: "VnExpress - Đời sống", feedUrl: "https://vnexpress.net/rss/gia-dinh.rss", home: "https://vnexpress.net/gia-dinh", slug: "doi-song" },
         { name: "VnExpress - Thể thao", feedUrl: "https://vnexpress.net/rss/the-thao.rss", home: "https://vnexpress.net/the-thao", slug: "the-thao" },
