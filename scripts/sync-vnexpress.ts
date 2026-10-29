@@ -13,19 +13,27 @@ interface FeedConfig {
   feedUrl: string;
   homepageUrl: string;
   categorySlug: string;
+  isFeatured?: boolean;
 }
 
 const VNEXPRESS_FEEDS: FeedConfig[] = [
   {
-    name: "VnExpress - Thời sự",
-    feedUrl: "https://vnexpress.net/rss/thoi-su.rss",
-    homepageUrl: "https://vnexpress.net/thoi-su",
+    name: "VnExpress - Tin nổi bật",
+    feedUrl: "https://vnexpress.net/rss/tin-noi-bat.rss",
+    homepageUrl: "https://vnexpress.net",
     categorySlug: "thoi-su",
+    isFeatured: true,
   },
   {
     name: "VnExpress - Tin mới nhất",
     feedUrl: "https://vnexpress.net/rss/tin-moi-nhat.rss",
     homepageUrl: "https://vnexpress.net",
+    categorySlug: "thoi-su",
+  },
+  {
+    name: "VnExpress - Thời sự",
+    feedUrl: "https://vnexpress.net/rss/thoi-su.rss",
+    homepageUrl: "https://vnexpress.net/thoi-su",
     categorySlug: "thoi-su",
   },
   {
@@ -41,9 +49,9 @@ const VNEXPRESS_FEEDS: FeedConfig[] = [
     categorySlug: "kinh-doanh",
   },
   {
-    name: "VnExpress - Số hóa Công nghệ",
-    feedUrl: "https://vnexpress.net/rss/so-hoa.rss",
-    homepageUrl: "https://vnexpress.net/so-hoa",
+    name: "VnExpress - Khoa học Công nghệ",
+    feedUrl: "https://vnexpress.net/rss/khoa-hoc-cong-nghe.rss",
+    homepageUrl: "https://vnexpress.net/khoa-hoc-cong-nghe",
     categorySlug: "cong-nghe",
   },
   {
@@ -54,8 +62,8 @@ const VNEXPRESS_FEEDS: FeedConfig[] = [
   },
   {
     name: "VnExpress - Đời sống",
-    feedUrl: "https://vnexpress.net/rss/doi-song.rss",
-    homepageUrl: "https://vnexpress.net/doi-song",
+    feedUrl: "https://vnexpress.net/rss/gia-dinh.rss",
+    homepageUrl: "https://vnexpress.net/gia-dinh",
     categorySlug: "doi-song",
   },
   {
@@ -149,6 +157,15 @@ async function syncVnExpress() {
 
         if (existingScraped || existingArticle) {
           totalSkippedDup++;
+          if (cfg.isFeatured) {
+            const artId = existingArticle?.id || existingScraped?.linkedArticleId;
+            if (artId) {
+              await prisma.article.update({
+                where: { id: artId },
+                data: { isFeatured: true, publishedAt: item.sourcePublishedAt || new Date() },
+              }).catch(() => {});
+            }
+          }
           continue;
         }
 
@@ -189,6 +206,7 @@ async function syncVnExpress() {
             imageSource: "VnExpress",
             categoryId,
             status: "PUBLISHED",
+            isFeatured: cfg.isFeatured || false,
             sourceType: "IMPORTED",
             sourceUrl: normalizedUrl,
             sourceName: "VnExpress",

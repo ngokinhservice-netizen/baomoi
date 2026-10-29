@@ -48,8 +48,9 @@ async function main() {
   }
   console.log("✅ Đã khởi tạo 8 chuyên mục tin tức báo chí.");
 
-  // 3. Khởi tạo 9 Nguồn tin tự động cập nhật liên tục từ VnExpress (AUTO_PUBLISH)
+  // 3. Khởi tạo 10 Nguồn tin tự động cập nhật liên tục từ VnExpress (AUTO_PUBLISH)
   const vnExpressFeeds = [
+    { name: "VnExpress - Tin nổi bật", feedUrl: "https://vnexpress.net/rss/tin-noi-bat.rss", home: "https://vnexpress.net", slug: "thoi-su" },
     { name: "VnExpress - Tin mới nhất", feedUrl: "https://vnexpress.net/rss/tin-moi-nhat.rss", home: "https://vnexpress.net", slug: "thoi-su" },
     { name: "VnExpress - Thời sự", feedUrl: "https://vnexpress.net/rss/thoi-su.rss", home: "https://vnexpress.net/thoi-su", slug: "thoi-su" },
     { name: "VnExpress - Thế giới", feedUrl: "https://vnexpress.net/rss/the-gioi.rss", home: "https://vnexpress.net/the-gioi", slug: "the-gioi" },

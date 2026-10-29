@@ -14,7 +14,7 @@ export async function getCategories() {
 
 export async function getFeaturedArticles(limit: number = 5) {
   try {
-    return await prisma.article.findMany({
+    const featured = await prisma.article.findMany({
       where: { status: "PUBLISHED", isFeatured: true },
       include: {
         category: { select: { id: true, name: true, slug: true } },
@@ -23,6 +23,26 @@ export async function getFeaturedArticles(limit: number = 5) {
       orderBy: { publishedAt: "desc" },
       take: limit,
     });
+
+    if (featured.length >= limit) {
+      return featured;
+    }
+
+    const featuredIds = featured.map((a) => a.id);
+    const fillers = await prisma.article.findMany({
+      where: {
+        status: "PUBLISHED",
+        id: { notIn: featuredIds },
+      },
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+        author: { select: { name: true } },
+      },
+      orderBy: { publishedAt: "desc" },
+      take: limit - featured.length,
+    });
+
+    return [...featured, ...fillers];
   } catch {
     return [];
   }
