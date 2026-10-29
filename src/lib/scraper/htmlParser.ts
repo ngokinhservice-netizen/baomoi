@@ -82,7 +82,13 @@ export function extractArticleFromHtml(
     undefined;
 
   if (metaDateStr) {
-    const d = new Date(metaDateStr);
+    let cleanDateStr = metaDateStr.trim();
+    // If format is like "2026-10-29 22:25" or "2026-10-29T22:25:00" without timezone offset,
+    // explicitly specify Vietnam timezone (+07:00) so UTC cloud servers do not treat it as UTC!
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(cleanDateStr)) {
+      cleanDateStr = cleanDateStr.replace(" ", "T") + (cleanDateStr.length === 16 ? ":00" : "") + "+07:00";
+    }
+    const d = new Date(cleanDateStr);
     if (!isNaN(d.getTime())) sourcePublishedAt = d;
   }
 
@@ -97,9 +103,9 @@ export function extractArticleFromHtml(
     }
   }
 
-  // 6.3 Fallback: Parse Vietnamese date string in DOM (e.g. "Thứ năm, 29/10/2026, 18:19 (GMT+7)")
+  // 6.3 Fallback: Parse Vietnamese date string in DOM (e.g. "Thứ năm, 29/10/2026, 18:19 (GMT+7)" or "29/10/2026 - 22:25")
   if (!sourcePublishedAt) {
-    const rawDateText = $(".header-content .date, span.date, .date-time, span.time, .article__meta time, .author-time .time").first().text().trim();
+    const rawDateText = $(".header-content .date, span.date, .date-time, span.time, .article__meta time, .author-time .time, .time-public, time").first().text().trim();
     if (rawDateText) {
       // Pattern: DD/MM/YYYY ... HH:mm
       const m1 = rawDateText.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})[^\d]+(\d{1,2}):(\d{2})/);
@@ -118,6 +124,17 @@ export function extractArticleFromHtml(
           if (!isNaN(d.getTime())) sourcePublishedAt = d;
         }
       }
+    }
+  }
+
+  // 6.4 Fallback: Parse timestamp from URL if present (e.g. 20261029150526)
+  if (!sourcePublishedAt) {
+    const mUrl = pageUrl.match(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
+    if (mUrl) {
+      const [, y, m, d, h, min, s] = mUrl;
+      const iso = `${y}-${m}-${d}T${h}:${min}:${s}+07:00`;
+      const dateObj = new Date(iso);
+      if (!isNaN(dateObj.getTime())) sourcePublishedAt = dateObj;
     }
   }
 

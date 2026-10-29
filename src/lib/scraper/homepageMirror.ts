@@ -38,9 +38,25 @@ export async function checkAndSyncHomepageMirror() {
 }
 
 export async function syncVnExpressHomepageMirror() {
-  // 1. Tải HTML trang chủ VnExpress
-  const { text: html } = await safeFetch("https://vnexpress.net", { timeoutMs: 8000 });
-  const $ = cheerio.load(html);
+  // 1. Tải song song HTML trang chủ VnExpress và các RSS feed chính để lấy thời gian xuất bản chuẩn xác nhất
+  const [homeRes, latestRss, topRss, thoiSuRss, kinhDoanhRss, xeRss] = await Promise.all([
+    safeFetch("https://vnexpress.net", { timeoutMs: 8000 }),
+    fetchRssFeed("https://vnexpress.net/rss/tin-moi-nhat.rss").catch(() => []),
+    fetchRssFeed("https://vnexpress.net/rss/tin-noi-bat.rss").catch(() => []),
+    fetchRssFeed("https://vnexpress.net/rss/thoi-su.rss").catch(() => []),
+    fetchRssFeed("https://vnexpress.net/rss/kinh-doanh.rss").catch(() => []),
+    fetchRssFeed("https://vnexpress.net/rss/oto-xe-may.rss").catch(() => []),
+  ]);
+  const $ = cheerio.load(homeRes.text);
+
+  // Xây dựng bản đồ thời gian xuất bản chuẩn xác từ RSS của VnExpress
+  const rssDateMap = new Map<string, Date>();
+  for (const item of [...latestRss, ...topRss, ...thoiSuRss, ...kinhDoanhRss, ...xeRss]) {
+    if (item.sourcePublishedAt) {
+      if (item.originalUrl) rssDateMap.set(normalizeUrl(item.originalUrl), item.sourcePublishedAt);
+      if (item.title) rssDateMap.set(cleanArticleTitle(item.title).toLowerCase(), item.sourcePublishedAt);
+    }
+  }
 
   // 2. Lấy ánh xạ chuyên mục trong database
   const categories = await prisma.category.findMany({ select: { id: true, slug: true } });
@@ -97,6 +113,8 @@ export async function syncVnExpressHomepageMirror() {
   const heroImg = extractBestImage(heroEl);
 
   if (heroTitle && heroUrl) {
+    const heroNormUrl = normalizeUrl(heroUrl);
+    const heroDate = rssDateMap.get(heroNormUrl) || rssDateMap.get(heroTitle.toLowerCase());
     targetArticles.push({
       title: heroTitle,
       url: heroUrl,
@@ -105,6 +123,7 @@ export async function syncVnExpressHomepageMirror() {
       isHero: true,
       isFeatured: true,
       priorityOrder: 0,
+      rssPublishedAt: heroDate,
     });
   }
 
@@ -117,6 +136,8 @@ export async function syncVnExpressHomepageMirror() {
     const img = extractBestImage($(el));
 
     if (title && url && title !== heroTitle && !targetArticles.some((a) => a.title === title || a.url === url)) {
+      const normU = normalizeUrl(url);
+      const dPub = rssDateMap.get(normU) || rssDateMap.get(title.toLowerCase());
       targetArticles.push({
         title,
         url,
@@ -125,6 +146,7 @@ export async function syncVnExpressHomepageMirror() {
         isHero: false,
         isFeatured: true,
         priorityOrder: i + 1,
+        rssPublishedAt: dPub,
       });
     }
   });
@@ -138,6 +160,8 @@ export async function syncVnExpressHomepageMirror() {
     const img = extractBestImage($(el));
 
     if (title && url && !targetArticles.some((a) => a.title === title || a.url === url)) {
+      const normU = normalizeUrl(url);
+      const dPub = rssDateMap.get(normU) || rssDateMap.get(title.toLowerCase());
       targetArticles.push({
         title,
         url,
@@ -146,33 +170,25 @@ export async function syncVnExpressHomepageMirror() {
         isHero: false,
         isFeatured: false,
         priorityOrder: i + 10,
+        rssPublishedAt: dPub,
       });
     }
   });
 
   // 3.4 Lấy thêm các bài vừa mới xuất bản từ RSS Tin mới nhất và RSS Xe để không bỏ sót bài vừa lên
-  try {
-    const [latestRss, xeRss] = await Promise.all([
-      fetchRssFeed("https://vnexpress.net/rss/tin-moi-nhat.rss").catch(() => []),
-      fetchRssFeed("https://vnexpress.net/rss/oto-xe-may.rss").catch(() => []),
-    ]);
-
-    for (const item of [...latestRss.slice(0, 8), ...xeRss.slice(0, 6)]) {
-      if (item.title && item.originalUrl && !targetArticles.some((a) => a.title === item.title || a.url === item.originalUrl)) {
-        targetArticles.push({
-          title: cleanArticleTitle(item.title),
-          url: item.originalUrl,
-          excerpt: item.excerpt || "",
-          imageUrl: item.imageUrl,
-          isHero: false,
-          isFeatured: false,
-          priorityOrder: 50,
-          rssPublishedAt: item.sourcePublishedAt,
-        });
-      }
+  for (const item of [...latestRss.slice(0, 8), ...xeRss.slice(0, 6)]) {
+    if (item.title && item.originalUrl && !targetArticles.some((a) => a.title === item.title || a.url === item.originalUrl)) {
+      targetArticles.push({
+        title: cleanArticleTitle(item.title),
+        url: item.originalUrl,
+        excerpt: item.excerpt || "",
+        imageUrl: item.imageUrl,
+        isHero: false,
+        isFeatured: false,
+        priorityOrder: 50,
+        rssPublishedAt: item.sourcePublishedAt,
+      });
     }
-  } catch {
-    // Không chặn tiến trình nếu RSS tạm thời nghẽn mạng
   }
 
   // 4. Lấy chi tiết song song theo từng đợt (chunks) để trích xuất ngày giờ chuẩn và nội dung HD
@@ -237,17 +253,29 @@ export async function syncVnExpressHomepageMirror() {
     const fullImg = detail?.imageUrl || item.imageUrl || existing?.featuredImage;
     const fullContent = detail?.extractedContent || existing?.content || `<p class="lead">${item.excerpt || ""}</p>`;
     const fullExcerpt = detail?.excerpt || item.excerpt || existing?.excerpt || "Tin tức từ VnExpress";
-    let realPublishedAt = detail?.sourcePublishedAt || existing?.publishedAt || item.rssPublishedAt || new Date();
+    let realPublishedAt = detail?.sourcePublishedAt || item.rssPublishedAt || existing?.publishedAt;
+    if (!realPublishedAt) {
+      realPublishedAt = new Date(Date.now() - 30 * 60 * 1000);
+    }
+    // Prevent future dates caused by timezone offset mismatches
     if (realPublishedAt.getTime() > Date.now()) {
-      realPublishedAt = new Date();
+      if (realPublishedAt.getTime() - Date.now() > 5 * 3600 * 1000) {
+        realPublishedAt = new Date(realPublishedAt.getTime() - 7 * 3600 * 1000);
+      } else {
+        realPublishedAt = new Date(Date.now() - 60 * 1000);
+      }
     }
 
     let articleId = existing?.id;
 
     if (existing) {
-      let finalPublishedAt = detail?.sourcePublishedAt || existing.publishedAt;
+      let finalPublishedAt = detail?.sourcePublishedAt || item.rssPublishedAt || existing.publishedAt;
       if (finalPublishedAt && finalPublishedAt.getTime() > Date.now()) {
-        finalPublishedAt = new Date();
+        if (finalPublishedAt.getTime() - Date.now() > 5 * 3600 * 1000) {
+          finalPublishedAt = new Date(finalPublishedAt.getTime() - 7 * 3600 * 1000);
+        } else {
+          finalPublishedAt = new Date(Date.now() - 60 * 1000);
+        }
       }
       const updated = await prisma.article.update({
         where: { id: existing.id },

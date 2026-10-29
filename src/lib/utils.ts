@@ -40,8 +40,19 @@ export function formatDate(date: Date | string | number | null | undefined): str
  */
 export function formatArticleDate(date: Date | string | number | null | undefined): string {
   if (!date) return "";
-  const d = new Date(date);
+  let d = new Date(date);
   if (isNaN(d.getTime())) return "";
+  const now = new Date();
+
+  // If date is in the future, correct the +7h timezone parsing bug
+  if (d.getTime() > now.getTime()) {
+    const shifted = new Date(d.getTime() - 7 * 3600 * 1000);
+    if (shifted.getTime() <= now.getTime()) {
+      d = shifted;
+    } else {
+      d = new Date(now.getTime() - 30 * 60 * 1000);
+    }
+  }
 
   const parts = new Intl.DateTimeFormat("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
@@ -68,8 +79,18 @@ export function formatArticleDate(date: Date | string | number | null | undefine
 
 export function formatDateShort(date: Date | string | number | null | undefined): string {
   if (!date) return "";
-  const d = new Date(date);
+  let d = new Date(date);
   if (isNaN(d.getTime())) return "";
+  const now = new Date();
+
+  // If date is in the future, correct the +7h timezone parsing bug
+  if (d.getTime() > now.getTime()) {
+    const shifted = new Date(d.getTime() - 7 * 3600 * 1000);
+    if (shifted.getTime() <= now.getTime()) {
+      d = shifted;
+    }
+  }
+
   const parts = new Intl.DateTimeFormat("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
     day: "2-digit",
@@ -82,13 +103,57 @@ export function formatDateShort(date: Date | string | number | null | undefined)
 
 export function formatRelativeTime(date: Date | string | number | null | undefined): string {
   if (!date) return "";
-  const d = new Date(date);
+  let d = new Date(date);
   if (isNaN(d.getTime())) return "";
   const now = new Date();
+
+  // If date is ahead of current time:
   if (d.getTime() > now.getTime()) {
+    const futureDiffMs = d.getTime() - now.getTime();
+    // If it's only slightly ahead (within 3 minutes), it's just normal server clock skew
+    if (futureDiffMs <= 3 * 60 * 1000) {
+      return "Vừa xong";
+    }
+    // If it's more than 3 minutes in the future, it was stored without timezone (+7h offset bug)
+    const shifted = new Date(d.getTime() - 7 * 3600 * 1000);
+    if (shifted.getTime() <= now.getTime()) {
+      d = shifted;
+    } else {
+      // If still slightly ahead after 7h shift, treat as recent
+      d = new Date(now.getTime() - 5 * 60 * 1000);
+    }
+  }
+
+  const diffMs = now.getTime() - d.getTime();
+  const minutesAgo = Math.floor(diffMs / (1000 * 60));
+
+  if (minutesAgo < 1) {
     return "Vừa xong";
   }
-  return formatDistanceToNow(d, { addSuffix: true, locale: vi });
+  if (minutesAgo < 60) {
+    return `${minutesAgo} phút trước`;
+  }
+  const hoursAgo = Math.floor(minutesAgo / 60);
+  if (hoursAgo < 24) {
+    return `${hoursAgo} giờ trước`;
+  }
+  const daysAgo = Math.floor(hoursAgo / 24);
+  if (daysAgo === 1) {
+    return "Hôm qua";
+  }
+  if (daysAgo < 7) {
+    return `${daysAgo} ngày trước`;
+  }
+
+  // Format as DD/MM for older articles
+  const parts = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+  }).formatToParts(d);
+  const day = parts.find((p) => p.type === "day")?.value || "";
+  const month = parts.find((p) => p.type === "month")?.value || "";
+  return `${day}/${month}`;
 }
 
 export function truncate(text: string | null | undefined, length: number = 160): string {

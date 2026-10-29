@@ -124,6 +124,18 @@ export function checkAndTriggerAutoScrape() {
 
             const uniqueSlug = `${slugify(cleanTitle)}-${Date.now().toString().slice(-5)}${Math.floor(Math.random() * 100)}`;
 
+            let finalPubDate = pubDate || item.sourcePublishedAt;
+            if (!finalPubDate) {
+              finalPubDate = new Date(Date.now() - 30 * 60 * 1000);
+            }
+            if (finalPubDate.getTime() > Date.now()) {
+              if (finalPubDate.getTime() - Date.now() > 5 * 3600 * 1000) {
+                finalPubDate = new Date(finalPubDate.getTime() - 7 * 3600 * 1000);
+              } else {
+                finalPubDate = new Date(Date.now() - 60 * 1000);
+              }
+            }
+
             await prisma.article.create({
               data: {
                 title: cleanTitle,
@@ -139,7 +151,7 @@ export function checkAndTriggerAutoScrape() {
                 sourceUrl: normalizedUrl,
                 sourceName: "VnExpress",
                 isFeatured: false,
-                publishedAt: pubDate || new Date(),
+                publishedAt: finalPubDate,
               },
             });
 
