@@ -194,7 +194,7 @@ export async function syncVnExpressHomepageMirror() {
       chunk.map(async (item) => {
         const normUrl = normalizeUrl(item.url);
         try {
-          const detailRes = await safeFetch(normUrl, { timeoutMs: 3800 });
+          const detailRes = await safeFetch(normUrl, { timeoutMs: 6000 });
           const $detail = cheerio.load(detailRes.text);
           const breadcrumbText = $detail(".breadcrumb li a, .parent_cate, .breadcrumb a")
             .map((_, el) => $detail(el).text().trim())

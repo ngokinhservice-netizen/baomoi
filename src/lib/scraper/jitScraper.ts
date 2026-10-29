@@ -76,6 +76,26 @@ export function checkAndTriggerAutoScrape() {
             });
 
             if (existing) {
+              // Self-heal: If existing article content was incompletely scraped, re-fetch full content
+              if (!existing.content || existing.content.length < 1200 || (existing.content.match(/<p[ >]/g) || []).length < 2) {
+                try {
+                  const detailRes = await safeFetch(normalizedUrl, { timeoutMs: 6000 });
+                  const extracted = extractArticleFromHtml(detailRes.text, normalizedUrl);
+                  if (extracted.extractedContent && extracted.extractedContent.length > (existing.content?.length || 0)) {
+                    await prisma.article.update({
+                      where: { id: existing.id },
+                      data: {
+                        content: extracted.extractedContent,
+                        featuredImage: extracted.imageUrl || existing.featuredImage,
+                        excerpt: extracted.excerpt || existing.excerpt,
+                        ...(extracted.sourcePublishedAt ? { publishedAt: extracted.sourcePublishedAt } : {}),
+                      },
+                    });
+                  }
+                } catch {
+                  // ignore
+                }
+              }
               continue;
             }
 

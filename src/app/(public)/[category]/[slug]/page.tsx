@@ -68,16 +68,19 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   // JIT Content Hydration: If article has sourceUrl but content is incomplete or short,
   // fetch the full body and high-res imagery immediately so visitor sees complete article
   let renderedContent = article.content;
-  if (
-    article.sourceUrl &&
-    (!article.content || article.content.length < 350 || (article.content.startsWith("<h2") && article.content.length < 500))
-  ) {
+  const isContentIncomplete =
+    !article.content ||
+    article.content.length < 1200 ||
+    (article.content.match(/<p[ >]/g) || []).length < 2 ||
+    (article.content.startsWith("<h2") && article.content.length < 500);
+
+  if (article.sourceUrl && isContentIncomplete) {
     try {
       const { safeFetch } = await import("@/lib/security");
       const { extractArticleFromHtml } = await import("@/lib/scraper/htmlParser");
       const prisma = (await import("@/lib/prisma")).default;
 
-      const res = await safeFetch(article.sourceUrl, { timeoutMs: 4000 });
+      const res = await safeFetch(article.sourceUrl, { timeoutMs: 8000 });
       const extracted = extractArticleFromHtml(res.text, article.sourceUrl);
       if (extracted.extractedContent && extracted.extractedContent.length > (article.content?.length || 0)) {
         renderedContent = extracted.extractedContent;
@@ -87,7 +90,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         if (extracted.sourcePublishedAt) {
           article.publishedAt = extracted.sourcePublishedAt;
         }
-        prisma.article
+        await prisma.article
           .update({
             where: { id: article.id },
             data: {

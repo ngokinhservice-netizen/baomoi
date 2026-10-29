@@ -137,8 +137,11 @@ export function extractArticleFromHtml(
     extractedContent = $(customSelectors.content).html() || "";
   }
 
-  // Check if article is a Photo Story / Slideshow (e.g. VnExpress Phóng sự ảnh / Photo story)
-  if (!extractedContent && $(".item_slide_show, .block_thumb_slide_show, .width-detail-photo").length > 0) {
+  // Check if article has substantial paragraphs in standard containers
+  const hasStandardParagraphs = $("article.fck_detail p.Normal, .fck_detail p.Normal, article.fck_detail p, .fck_detail p, .detail-content p, .article-body p").length >= 2;
+
+  // Check if article is a dedicated Photo Story / Slideshow (e.g. VnExpress Phóng sự ảnh / Photo story) with minimal or no body text
+  if (!extractedContent && !hasStandardParagraphs && $(".item_slide_show, .block_thumb_slide_show, .width-detail-photo").length > 0) {
     const formattedElements: string[] = [];
     const leadText = $(".description, p.description, .width-detail-photo .description").first().text().trim();
     if (leadText) {
@@ -220,7 +223,7 @@ export function extractArticleFromHtml(
             candidateElements.push($(el));
           });
         } else {
-          match.find("p, figure, table.tplCaption, div.fig-picture, h2, h3, h4, blockquote, ul, ol").each((_, el) => {
+          match.find("p, figure, table.tplCaption, div.fig-picture, .item_slide_show, h2, h3, h4, blockquote, ul, ol").each((_, el) => {
             const $item = $(el);
             if ($item.is("p") && $item.closest("figure, figcaption, table").length) return;
             candidateElements.push($item);
@@ -237,7 +240,7 @@ export function extractArticleFromHtml(
             }
           } else if (["h2", "h3", "h4"].includes(tagName)) {
             formattedElements.push(`<${tagName} class="font-bold text-gray-900 mt-6 mb-3">${$el.html()}</${tagName}>`);
-          } else if (tagName === "figure" || (tagName === "table" && $el.hasClass("tplCaption")) || $el.hasClass("fig-picture")) {
+          } else if (tagName === "figure" || (tagName === "table" && $el.hasClass("tplCaption")) || $el.hasClass("fig-picture") || $el.hasClass("item_slide_show")) {
             let imgSrc = "";
             const srcset = $el.find("picture source").attr("data-srcset") || $el.find("picture source").attr("srcset");
             if (srcset) {
@@ -248,17 +251,27 @@ export function extractArticleFromHtml(
               const img = $el.find("img");
               imgSrc = img.attr("data-src") || img.attr("data-original") || img.attr("src") || "";
             }
-            const caption = $el.find("figcaption, .desc_cation, .Image, p").text().trim();
+            const caption = ($el.find("figcaption, .desc_cation").first().text() || $el.find(".Image, p").first().text() || "").trim().replace(/\s+/g, " ");
             if (imgSrc) {
               try {
                 imgSrc = new URL(imgSrc, pageUrl).toString();
               } catch {
                 // keep as is
               }
+              const isVideo = $el.find("video, .box_embed_video_parent, [data-vid], .thumb-above-video").length > 0;
               formattedElements.push(`
                 <figure class="my-6">
-                  <img src="${imgSrc}" alt="${caption}" class="w-full rounded-lg shadow-sm" loading="lazy" referrerpolicy="no-referrer" />
-                  ${caption ? `<figcaption class="text-xs text-gray-500 text-center mt-2 italic">${caption}</figcaption>` : ""}
+                  <div class="relative overflow-hidden rounded-xl shadow-md border border-gray-100 bg-black">
+                    <img src="${imgSrc}" alt="${caption || "Hình ảnh bài viết"}" class="w-full object-cover max-h-[550px]" loading="lazy" referrerpolicy="no-referrer" />
+                    ${isVideo ? `
+                      <div class="absolute inset-0 flex items-center justify-center bg-black/25">
+                        <div class="w-14 h-14 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg">
+                          <svg class="w-7 h-7 fill-current ml-1" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                      </div>
+                    ` : ""}
+                  </div>
+                  ${caption ? `<figcaption class="text-xs sm:text-sm text-gray-600 text-center mt-2.5 italic font-sans bg-gray-50 p-2.5 rounded-lg border border-gray-100">${caption}</figcaption>` : ""}
                 </figure>
               `);
             }
