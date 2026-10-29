@@ -86,7 +86,7 @@ export default function ArticleForm({ initialData, isEdit = false }: ArticleForm
     const timer = setInterval(() => {
       if (title || content) {
         localStorage.setItem(
-          "mtk_article_draft",
+          "nhipsong_article_draft",
           JSON.stringify({ title, subtitle, excerpt, content, categoryId, featuredImage })
         );
         setAutoSavedTime(new Date().toLocaleTimeString("vi-VN"));
@@ -99,7 +99,7 @@ export default function ArticleForm({ initialData, isEdit = false }: ArticleForm
   // Restore draft if available
   useEffect(() => {
     if (!isEdit && !title && !content) {
-      const saved = localStorage.getItem("mtk_article_draft");
+      const saved = localStorage.getItem("nhipsong_article_draft");
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -230,7 +230,7 @@ export default function ArticleForm({ initialData, isEdit = false }: ArticleForm
 
       // Clear local draft if new
       if (!isEdit) {
-        localStorage.removeItem("mtk_article_draft");
+        localStorage.removeItem("nhipsong_article_draft");
       }
 
       setSuccessMessage(

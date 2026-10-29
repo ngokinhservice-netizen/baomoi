@@ -1,4 +1,4 @@
-// Prisma Schema for MTK NEWS (SQLite provider for seamless local execution)
+// Prisma Schema for NHỊP SỐNG 247 (SQLite provider for seamless local execution)
 // Switchable to PostgreSQL anytime via DATABASE_URL or schema.postgresql.prisma
 
 generator client {

@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import prisma from "./prisma";
 
-const JWT_SECRET = process.env.JWT_SECRET || "mtk-news-super-secret-jwt-key-change-in-production-min-32-chars";
+const JWT_SECRET = process.env.JWT_SECRET || "nhipsong247-secure-auth-jwt-token-production-key-2026";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 export const ROLES = {
@@ -56,7 +56,7 @@ export async function getSessionUser(req?: NextRequest): Promise<TokenPayload | 
     }
     // 2. Check req.cookies directly
     if (!token) {
-      token = req.cookies.get("mtk_token")?.value;
+      token = req.cookies.get("nhipsong_token")?.value || req.cookies.get("mtk_token")?.value;
     }
   }
 
@@ -64,7 +64,7 @@ export async function getSessionUser(req?: NextRequest): Promise<TokenPayload | 
   if (!token) {
     try {
       const cookieStore = cookies();
-      token = cookieStore.get("mtk_token")?.value;
+      token = cookieStore.get("nhipsong_token")?.value || cookieStore.get("mtk_token")?.value;
     } catch {
       // Cookies might fail if outside Next.js request context
     }

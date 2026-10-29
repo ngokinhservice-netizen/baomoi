@@ -250,7 +250,7 @@ export default function AdminUsersPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@mtknews.vn"
+                  placeholder="user@nhipsong247.vn"
                   className="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 focus:bg-white focus:border-primary focus:outline-none"
                 />
               </div>

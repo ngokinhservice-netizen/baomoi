@@ -6,8 +6,8 @@ import { Shield, Lock, Mail, ArrowRight, AlertCircle, Loader2 } from "lucide-rea
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@mtknews.vn");
-  const [password, setPassword] = useState("Admin@MTK2026Password!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,16 +64,16 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                Email Quản Trị
+                Tài Khoản Quản Trị
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@mtknews.vn"
+                  placeholder="Nhập tên tài khoản hoặc email"
                   className="w-full pl-9 pr-3 py-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:border-primary focus:outline-none transition-colors"
                 />
               </div>
@@ -114,12 +114,6 @@ export default function AdminLoginPage() {
               )}
             </button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-gray-100 text-center">
-            <p className="text-xs text-gray-500">
-              Tài khoản mặc định: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">admin@mtknews.vn</code>
-            </p>
-          </div>
         </div>
       </div>
     </div>

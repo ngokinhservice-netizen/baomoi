@@ -15,7 +15,7 @@ export default function AutoSyncTrigger() {
         localStorage.setItem(STORAGE_KEY, now.toString());
 
         // Kích hoạt đồng bộ tin tức ngầm từ VnExpress
-        fetch("/api/cron/scrape?secret=mtk-cron-secret-token-change-in-production&force=true", {
+        fetch("/api/cron/scrape?secret=nhipsong-cron-secret-token-2026&force=true", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         })

@@ -4,7 +4,7 @@ import { extractArticleFromHtml } from "../src/lib/scraper/htmlParser";
 
 async function populateFullContent() {
   console.log("==================================================================");
-  console.log("   MTK NEWS — ĐIỀN TOÀN BỘ NỘI DUNG CHI TIẾT VÀO BÀI VIẾT (FULL BODY)   ");
+  console.log("   NHỊP SỐNG 247 — ĐIỀN TOÀN BỘ NỘI DUNG CHI TIẾT VÀO BÀI VIẾT (FULL BODY)   ");
   console.log("==================================================================");
 
   // 1. First, find and update the Carrick article requested by user

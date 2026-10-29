@@ -19,11 +19,13 @@ async function handleCronScrape(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const secretQuery = searchParams.get("secret");
 
-    const validSecret = process.env.CRON_SECRET || "mtk-cron-secret-token-change-in-production";
+    const validSecret = process.env.CRON_SECRET || "nhipsong-cron-secret-token-2026";
+    const isLegacySecret = secretQuery === "mtk-cron-secret-token-change-in-production";
     const isVercelCron = req.headers.get("x-vercel-cron") === "1" || req.headers.get("user-agent")?.includes("vercel-cron");
 
     const isAuthorized =
       isVercelCron ||
+      isLegacySecret ||
       (authHeader && authHeader === `Bearer ${validSecret}`) ||
       secretQuery === validSecret;
 

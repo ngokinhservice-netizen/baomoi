@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         fileSize: file.size,
         altText,
         caption,
-        sourceName: "MTK Upload",
+        sourceName: "NHỊP SỐNG 247",
         licenseStatus: "VERIFIED",
       },
     });

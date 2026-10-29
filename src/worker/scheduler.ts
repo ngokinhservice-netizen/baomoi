@@ -48,7 +48,7 @@ async function checkAndRunScheduledSources() {
 
 async function startWorker() {
   console.log("=================================================");
-  console.log("   MTK NEWS — BACKGROUND SCRAPER WORKER RUNNING   ");
+  console.log("   NHỊP SỐNG 247 — BACKGROUND SCRAPER WORKER RUNNING   ");
   console.log("=================================================");
   console.log("Chu kỳ kiểm tra: mỗi 60 giây.");
   console.log("Nhấn Ctrl+C để dừng worker an toàn.");

@@ -49,7 +49,7 @@ function heuristicAnalysis(req: AiAssistRequest): AiAssistResponse {
   ];
 
   // 3. SEO
-  const seoTitle = `${baseTitle} | MTK NEWS`;
+  const seoTitle = `${baseTitle} | NHỊP SỐNG 247`;
   const seoDescription = summary.slice(0, 160);
 
   // 4. Category Heuristic
@@ -83,7 +83,7 @@ function heuristicAnalysis(req: AiAssistRequest): AiAssistResponse {
     suggestedCategory,
     entities: {
       people: matches.slice(0, 3),
-      organizations: ["MTK NEWS", ...matches.slice(3, 5)],
+      organizations: ["NHỊP SỐNG 247", ...matches.slice(3, 5)],
       locations: ["Việt Nam", ...matches.slice(5, 7)],
       dates: [new Date().toLocaleDateString("vi-VN")],
     },
@@ -108,7 +108,7 @@ export async function runAiAssistant(request: AiAssistRequest): Promise<AiAssist
 
   try {
     const prompt = `
-Bạn là trợ lý biên tập viên báo điện tử tiếng Việt chuyên nghiệp của MTK NEWS.
+Bạn là trợ lý biên tập viên báo điện tử tiếng Việt chuyên nghiệp của NHỊP SỐNG 247.
 Nội dung bài viết:
 Tiêu đề: ${request.title || ""}
 Mô tả: ${request.excerpt || ""}

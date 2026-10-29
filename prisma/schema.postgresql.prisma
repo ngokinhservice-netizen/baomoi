@@ -1,4 +1,4 @@
-// Production Prisma Schema for MTK NEWS (PostgreSQL provider)
+// Production Prisma Schema for NHỊP SỐNG 247 (PostgreSQL provider)
 // Use this file when deploying to PostgreSQL environments (Supabase, Neon, RDS, Docker, etc.)
 
 generator client {

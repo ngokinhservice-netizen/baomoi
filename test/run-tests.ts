@@ -25,7 +25,7 @@ function assert(condition: boolean, testName: string, failureDetails?: any) {
 
 async function runAllTests() {
   console.log("=================================================");
-  console.log("    MTK NEWS — AUTOMATED TEST SUITE EXECUTION    ");
+  console.log("    NHỊP SỐNG 247 — AUTOMATED TEST SUITE EXECUTION    ");
   console.log("=================================================\n");
 
   // ------------------------------------------------------------------------
@@ -130,7 +130,7 @@ async function runAllTests() {
   <meta property="og:description" content="Chính phủ ưu tiên nguồn lực mạnh mẽ cho trung tâm nghiên cứu AI." />
   <meta property="og:image" content="https://example.com/featured.jpg" />
   <meta property="article:published_time" content="2026-10-27T08:00:00Z" />
-  <meta name="author" content="Phóng Viên MTK" />
+  <meta name="author" content="Phóng Viên 247" />
   <link rel="canonical" href="https://example.com/tech/hoi-nghi-ai" />
 </head>
 <body>
@@ -145,7 +145,7 @@ async function runAllTests() {
   const extracted = extractArticleFromHtml(sampleHtml, "https://example.com/tech/hoi-nghi-ai");
   assert(extracted.title === "Thủ tướng chủ trì hội nghị phát triển công nghệ cao", "Trích xuất OpenGraph Title");
   assert(extracted.imageUrl === "https://example.com/featured.jpg", "Trích xuất OpenGraph Image");
-  assert(extracted.sourceAuthor === "Phóng Viên MTK", "Trích xuất Tác giả");
+  assert(extracted.sourceAuthor === "Phóng Viên 247", "Trích xuất Tác giả");
   assert(extracted.canonicalUrl === "https://example.com/tech/hoi-nghi-ai", "Trích xuất Canonical URL");
   assert(Boolean(extracted.extractedContent?.includes("Hội nghị quy tụ hơn 500 chuyên gia")), "Trích xuất nội dung bài viết từ article container");
 
@@ -164,12 +164,12 @@ async function runAllTests() {
 
   const token = signToken({
     userId: "test-user-id",
-    email: "admin@mtknews.vn",
+    email: "admin123@nhipsong247.vn",
     role: "ADMIN",
     name: "Admin User",
   });
   const decoded = verifyToken(token);
-  assert(decoded?.email === "admin@mtknews.vn", "Tạo và xác thực JWT token thành công");
+  assert(decoded?.email === "admin123@nhipsong247.vn", "Tạo và xác thực JWT token thành công");
 
   assert(checkPermission(ROLES.ADMIN, ROLES.EDITOR), "ADMIN có quyền của EDITOR");
   assert(checkPermission(ROLES.EDITOR, ROLES.AUTHOR), "EDITOR có quyền của AUTHOR");
@@ -181,7 +181,7 @@ async function runAllTests() {
   // ------------------------------------------------------------------------
   console.log("\n🔍 NHÓM 6: KIỂM TRA TÍNH TOÀN VẸN CỦA CƠ SỞ DỮ LIỆU");
 
-  const adminUser = await prisma.user.findUnique({ where: { email: "admin@mtknews.vn" } });
+  const adminUser = await prisma.user.findUnique({ where: { email: "admin123@nhipsong247.vn" } });
   assert(adminUser !== null && adminUser.role === "ADMIN", "Tài khoản Admin đã được tạo an toàn trong database");
 
   const categoriesCount = await prisma.category.count();

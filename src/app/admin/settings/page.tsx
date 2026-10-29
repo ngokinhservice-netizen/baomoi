@@ -5,10 +5,10 @@ import { Settings, Save, Check, Loader2, Sparkles, Shield, Globe } from "lucide-
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({
-    siteName: "MTK NEWS",
-    siteDescription: "Báo điện tử tin tức thời sự hàng đầu Việt Nam và Quốc tế",
-    contactEmail: "toasoan@mtknews.vn",
-    footerText: "© 2026 MTK NEWS. Cơ quan xuất bản tin tức điện tử.",
+    siteName: "NHỊP SỐNG 247",
+    siteDescription: "Báo điện tử tin tức & nhịp đập thời sự 24/7 hàng đầu Việt Nam và Quốc tế",
+    contactEmail: "toasoan@nhipsong247.vn",
+    footerText: "© 2026 NHỊP SỐNG 247. Báo điện tử tin tức & nhịp đập 24/7.",
     articlesPerPage: "12",
     enableAiAssistant: "true",
     defaultScrapeMode: "EDITORIAL_QUEUE",

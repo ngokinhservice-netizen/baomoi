@@ -379,7 +379,7 @@ export default function ImportedArticlesQueuePage() {
               {/* Category picker for approval */}
               <div className="p-3 bg-red-50/50 rounded-lg border border-red-100 space-y-2">
                 <label className="block font-bold text-gray-800">
-                  Chọn chuyên mục xuất bản vào MTK NEWS:
+                  Chọn chuyên mục xuất bản vào NHỊP SỐNG 247:
                 </label>
                 <select
                   value={selectedCategory}

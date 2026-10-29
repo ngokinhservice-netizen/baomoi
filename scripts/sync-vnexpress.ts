@@ -82,7 +82,7 @@ const VNEXPRESS_FEEDS: FeedConfig[] = [
 
 async function syncVnExpress() {
   console.log("==================================================================");
-  console.log("    MTK NEWS — ĐỒNG BỘ TOÀN DIỆN VNEXPRESS (1 TUẦN QUA -> HIỆN TẠI)   ");
+  console.log("    NHỊP SỐNG 247 — ĐỒNG BỘ TOÀN DIỆN VNEXPRESS (1 TUẦN QUA -> HIỆN TẠI)   ");
   console.log("==================================================================");
   console.log(`Mốc thời gian lấy tin: từ ${cutoffDate.toLocaleDateString("vi-VN")} đến nay.\n`);
 

@@ -8,22 +8,34 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Đang khởi tạo dữ liệu chuẩn cho NHỊP SỐNG 247...");
 
-  // 1. Tạo tài khoản Quản trị viên & Biên tập viên
-  const adminPasswordHash = await bcrypt.hash("Admin@NhipSong247Password!", 10);
+  // 1. Tạo tài khoản Quản trị viên
+  const adminPasswordHash = await bcrypt.hash("admin123", 10);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@nhipsong247.vn" },
-    update: {},
+    where: { email: "admin123@nhipsong247.vn" },
+    update: {
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      isActive: true,
+    },
     create: {
-      name: "Ban Biên Tập NHỊP SỐNG 247",
-      email: "admin@nhipsong247.vn",
+      name: "Ban Quản Trị",
+      email: "admin123@nhipsong247.vn",
       passwordHash: adminPasswordHash,
       role: "ADMIN",
       isActive: true,
     },
   });
 
-  console.log("✅ Đã tạo tài khoản quản trị NHỊP SỐNG 247:");
-  console.log("   - Admin: admin@nhipsong247.vn / Admin@NhipSong247Password!");
+  // Dọn dẹp tài khoản cũ
+  await prisma.user.deleteMany({
+    where: {
+      email: {
+        contains: "mtknews.vn",
+      },
+    },
+  });
+
+  console.log("✅ Đã tạo tài khoản quản trị NHỊP SỐNG 247 thành công.");
 
   // 2. Tạo 8 danh mục báo chí chuẩn mực
   const categoriesData = [

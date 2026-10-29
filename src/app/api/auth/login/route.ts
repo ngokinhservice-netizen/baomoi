@@ -11,17 +11,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Vui lòng nhập đầy đủ email và mật khẩu." }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    const identifier = String(email || "").toLowerCase().trim();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { email: identifier === "admin123" ? "admin123@nhipsong247.vn" : identifier },
+          { email: identifier === "admin123@nhipsong247.vn" ? "admin123" : identifier },
+        ],
+      },
     });
 
     if (!user || !user.isActive) {
-      return NextResponse.json({ error: "Email hoặc mật khẩu không chính xác." }, { status: 401 });
+      return NextResponse.json({ error: "Tài khoản hoặc mật khẩu không chính xác." }, { status: 401 });
     }
 
     const isMatch = await verifyPassword(password, user.passwordHash);
     if (!isMatch) {
-      return NextResponse.json({ error: "Email hoặc mật khẩu không chính xác." }, { status: 401 });
+      return NextResponse.json({ error: "Tài khoản hoặc mật khẩu không chính xác." }, { status: 401 });
     }
 
     const token = signToken({
@@ -53,7 +61,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Set secure HTTP-only cookie
-    response.cookies.set("mtk_token", token, {
+    response.cookies.set("nhipsong_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

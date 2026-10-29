@@ -15,6 +15,37 @@ export async function syncAllLocalDataToDatabase() {
   const raw = fs.readFileSync(dataPath, "utf8");
   const data = JSON.parse(raw);
 
+  // 0. Ensure Admin Account & Cleanup old MTK accounts
+  try {
+    const adminPasswordHash = "$2a$10$097tL8OiSmGXBVdCCAQn1eK2FGOqwY/p1mAyTOoDX42M2Q3d/DIk6";
+    await prisma.user.upsert({
+      where: { email: "admin123@nhipsong247.vn" },
+      update: {
+        passwordHash: adminPasswordHash,
+        role: "ADMIN",
+        isActive: true,
+      },
+      create: {
+        name: "Ban Quản Trị",
+        email: "admin123@nhipsong247.vn",
+        passwordHash: adminPasswordHash,
+        role: "ADMIN",
+        isActive: true,
+      },
+    });
+
+    await prisma.user.deleteMany({
+      where: {
+        email: {
+          contains: "mtknews.vn",
+        },
+      },
+    });
+    console.log("✅ Đã cập nhật tài khoản quản trị admin123 và xóa tài khoản cũ.");
+  } catch (err: any) {
+    console.warn("Lỗi đồng bộ tài khoản admin:", err?.message);
+  }
+
   // 1. Categories
   const catMap = new Map<string, string>();
   for (const cat of data.categories) {
