@@ -21,28 +21,63 @@ export function formatDate(date: Date | string | number | null | undefined): str
   if (!date) return "";
   const d = new Date(date);
   if (isNaN(d.getTime())) return "";
-  return format(d, "dd/MM/yyyy HH:mm", { locale: vi });
+  const parts = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const getPart = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  return `${getPart("day")}/${getPart("month")}/${getPart("year")} ${getPart("hour")}:${getPart("minute")}`;
 }
 
 /**
- * Định dạng ngày giờ chi tiết chuẩn theo phong cách VnExpress:
+ * Định dạng ngày giờ chi tiết chuẩn theo phong cách VnExpress (Múi giờ Việt Nam GMT+7):
  * Ví dụ: "Thứ năm, 29/10/2026, 18:19 (GMT+7)"
  */
 export function formatArticleDate(date: Date | string | number | null | undefined): string {
   if (!date) return "";
   const d = new Date(date);
   if (isNaN(d.getTime())) return "";
-  const dayName = format(d, "EEEE", { locale: vi });
-  const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-  const timeStr = format(d, "dd/MM/yyyy, HH:mm", { locale: vi });
-  return `${capitalizedDay}, ${timeStr} (GMT+7)`;
+
+  const parts = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const getPart = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  let weekday = getPart("weekday");
+  weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  const day = getPart("day");
+  const month = getPart("month");
+  const year = getPart("year");
+  const hour = getPart("hour");
+  const minute = getPart("minute");
+
+  return `${weekday}, ${day}/${month}/${year}, ${hour}:${minute} (GMT+7)`;
 }
 
 export function formatDateShort(date: Date | string | number | null | undefined): string {
   if (!date) return "";
   const d = new Date(date);
   if (isNaN(d.getTime())) return "";
-  return format(d, "dd/MM/yyyy", { locale: vi });
+  const parts = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).formatToParts(d);
+  const getPart = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  return `${getPart("day")}/${getPart("month")}/${getPart("year")}`;
 }
 
 export function formatRelativeTime(date: Date | string | number | null | undefined): string {
