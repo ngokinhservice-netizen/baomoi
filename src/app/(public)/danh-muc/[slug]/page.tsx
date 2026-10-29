@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import ArticleCard from "@/components/news/ArticleCard";
 import Sidebar from "@/components/news/Sidebar";
-import { getMostReadArticles } from "@/lib/data";
+import { getMostReadArticles, deduplicateArticles } from "@/lib/data";
 import { ChevronRight, Filter } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -55,11 +55,12 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       },
       orderBy: orderBy as any,
       skip: (page - 1) * limit,
-      take: limit,
+      take: limit * 2,
     }),
     getMostReadArticles(5),
   ]);
 
+  const displayArticles = deduplicateArticles(articles).slice(0, limit);
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -111,9 +112,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Article Grid (8 cols) */}
         <div className="lg:col-span-8">
-          {articles.length > 0 ? (
+          {displayArticles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {articles.map((article) => (
+              {displayArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} variant="standard" />
               ))}
             </div>

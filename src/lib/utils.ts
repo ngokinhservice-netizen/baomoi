@@ -44,3 +44,28 @@ export function truncate(text: string | null | undefined, length: number = 160):
   if (cleaned.length <= length) return cleaned;
   return cleaned.slice(0, length).trim() + "...";
 }
+
+/**
+ * Xóa sạch các hậu tố tên báo khỏi tiêu đề bài viết (ví dụ: " - Báo VnExpress", " - Báo VnExpress Thể thao",...)
+ */
+export function cleanArticleTitle(title: string): string {
+  if (!title) return "";
+  return title
+    .replace(/\s*[-–—|]\s*(Báo\s+)?VnExpress(\s+[A-Za-zÀ-ỹ\s]+)?$/i, "")
+    .replace(/\s*[-–—|]\s*(Báo\s+)?Tuổi\s+Trẻ(\s+[A-Za-zÀ-ỹ\s]+)?$/i, "")
+    .replace(/\s*[-–—|]\s*(Báo\s+)?Thanh\s+Niên(\s+[A-Za-zÀ-ỹ\s]+)?$/i, "")
+    .replace(/\s*[-–—|]\s*(Báo\s+)?Dân\s+Trí(\s+[A-Za-zÀ-ỹ\s]+)?$/i, "")
+    .replace(/\s*[-–—|]\s*(Báo\s+)?Vietnamnet(\s+[A-Za-zÀ-ỹ\s]+)?$/i, "")
+    .trim();
+}
+
+/**
+ * Khóa chuẩn hóa tiêu đề phục vụ phát hiện trùng lặp bài viết
+ */
+export function normalizeTitleKey(title: string): string {
+  return cleanArticleTitle(title)
+    .toLowerCase()
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'’“”]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}

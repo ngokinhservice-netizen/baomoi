@@ -2,6 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import { safeFetch } from "../security";
 import { DiscoveredArticle } from "./types";
 import { normalizeUrl } from "./normalizer";
+import { cleanArticleTitle } from "../utils";
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -22,7 +23,8 @@ export function parseRssOrAtomXml(xmlText: string, baseUrl: string): DiscoveredA
     const rawItems = Array.isArray(channel.item) ? channel.item : channel.item ? [channel.item] : [];
 
     for (const item of rawItems) {
-      const title = item.title ? String(item.title).replace(/<!\[CDATA\[(.*?)\]\]>/g, "$1").trim() : "";
+      const rawTitle = item.title ? String(item.title).replace(/<!\[CDATA\[(.*?)\]\]>/g, "$1").trim() : "";
+      const title = cleanArticleTitle(rawTitle);
       let link = "";
 
       if (typeof item.link === "string") {
@@ -86,7 +88,8 @@ export function parseRssOrAtomXml(xmlText: string, baseUrl: string): DiscoveredA
     const rawEntries = Array.isArray(feed.entry) ? feed.entry : [feed.entry];
 
     for (const entry of rawEntries) {
-      const title = entry.title ? (typeof entry.title === "string" ? entry.title : entry.title["#text"]) : "";
+      const rawTitle = entry.title ? (typeof entry.title === "string" ? entry.title : entry.title["#text"]) : "";
+      const title = cleanArticleTitle(rawTitle);
       let link = "";
 
       if (Array.isArray(entry.link)) {

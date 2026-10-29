@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { runScraperJob } from "@/lib/scraper/engine";
 import { syncVnExpressHomepageMirror } from "@/lib/scraper/homepageMirror";
+import { cleanupDuplicateArticlesInDb } from "@/lib/dbCleanup";
 
 export async function GET(req: NextRequest) {
   return handleCronScrape(req);
@@ -124,6 +125,13 @@ async function handleCronScrape(req: NextRequest) {
       await syncVnExpressHomepageMirror();
     } catch (mErr: any) {
       console.warn("Lỗi sync mirror trang chủ:", mErr.message);
+    }
+
+    // Tự động quét dọn toàn bộ bài viết trùng lặp sau mỗi lần cào
+    try {
+      await cleanupDuplicateArticlesInDb();
+    } catch (cErr: any) {
+      console.warn("Lỗi cleanup duplicate:", cErr.message);
     }
 
     return NextResponse.json({

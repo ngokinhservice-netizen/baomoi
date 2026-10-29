@@ -46,7 +46,9 @@ export default async function HomePage() {
 
   const heroArticle = featuredArticles[0] || latestArticles[0];
   const secondaryFeatured = featuredArticles.slice(1, 4);
-  const editorPicks = featuredArticles.slice(3, 5).concat(latestArticles.slice(4, 6));
+  const featuredIds = new Set(featuredArticles.map((a) => a.id));
+  const cleanLatestArticles = latestArticles.filter((a) => !featuredIds.has(a.id));
+  const editorPicks = cleanLatestArticles.slice(6, 10);
 
   return (
     <div className="space-y-10">
@@ -102,12 +104,12 @@ export default async function HomePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 <div className="space-y-4">
-                  {latestArticles.slice(0, 3).map((art) => (
+                  {cleanLatestArticles.slice(0, 3).map((art) => (
                     <ArticleCard key={art.id} article={art} variant="compact" />
                   ))}
                 </div>
                 <div className="space-y-4 md:pl-4 pt-4 md:pt-0">
-                  {latestArticles.slice(3, 6).map((art) => (
+                  {cleanLatestArticles.slice(3, 6).map((art) => (
                     <ArticleCard key={art.id} article={art} variant="compact" />
                   ))}
                 </div>
@@ -191,7 +193,7 @@ export default async function HomePage() {
             <div className="sticky top-24">
               <Sidebar
                 mostReadArticles={mostReadArticles}
-                latestNews={latestArticles.slice(0, 5)}
+                latestNews={cleanLatestArticles.slice(0, 5)}
               />
             </div>
           </div>

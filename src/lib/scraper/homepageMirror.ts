@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import { safeFetch } from "../security";
 import { extractArticleFromHtml } from "./htmlParser";
 import { normalizeUrl } from "./normalizer";
-import { slugify } from "../utils";
+import { slugify, cleanArticleTitle } from "../utils";
 
 let isMirrorSyncActive = false;
 let lastMirrorSyncTime = 0;
@@ -71,7 +71,8 @@ export async function syncVnExpressHomepageMirror() {
 
   // 2. Extract HERO Article (Tin tiêu điểm lớn nhất đầu trang VnExpress)
   const heroEl = $("article.article-topstory, article.item-news.full-thumb, .wrapper-topstory article").first();
-  const heroTitle = heroEl.find(".title-news a, h2 a, h3 a").first().text().trim();
+  const heroRawTitle = heroEl.find(".title-news a, h2 a, h3 a").first().text().trim();
+  const heroTitle = cleanArticleTitle(heroRawTitle);
   const heroUrl = heroEl.find(".title-news a, h2 a, h3 a").first().attr("href");
   const heroDesc = heroEl.find(".description a, p.description").first().text().trim();
   const heroImg =
@@ -95,7 +96,8 @@ export async function syncVnExpressHomepageMirror() {
 
   // 3. Extract SUB-TOPSTORIES (Khung tiêu điểm cạnh Hero trên VnExpress)
   $(".wrapper-topstory-folder .col-left article.item-news, .col-left.col-small article.item-news").slice(0, 4).each((i, el) => {
-    const title = $(el).find(".title-news a, h2 a, h3 a").first().text().trim();
+    const rawTitle = $(el).find(".title-news a, h2 a, h3 a").first().text().trim();
+    const title = cleanArticleTitle(rawTitle);
     const url = $(el).find(".title-news a, h2 a, h3 a").first().attr("href");
     const desc = $(el).find(".description a, p.description").first().text().trim();
     const img =
@@ -120,7 +122,8 @@ export async function syncVnExpressHomepageMirror() {
 
   // 4. Extract STREAM ARTICLES (Dòng sự kiện mới nhất trên trang chủ VnExpress)
   $("article.item-news").slice(4, 20).each((i, el) => {
-    const title = $(el).find(".title-news a, h2 a, h3 a").first().text().trim();
+    const rawTitle = $(el).find(".title-news a, h2 a, h3 a").first().text().trim();
+    const title = cleanArticleTitle(rawTitle);
     const url = $(el).find(".title-news a, h2 a, h3 a").first().attr("href");
     const desc = $(el).find(".description a, p.description").first().text().trim();
     const img =

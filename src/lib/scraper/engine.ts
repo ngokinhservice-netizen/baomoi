@@ -5,7 +5,7 @@ import { fetchSitemap } from "./sitemapParser";
 import { extractArticleFromHtml, discoverArticleLinksFromListing } from "./htmlParser";
 import { normalizeUrl, hashString, hashContent } from "./normalizer";
 import { DiscoveredArticle, ScrapeExecutionResult } from "./types";
-import { slugify } from "../utils";
+import { slugify, cleanArticleTitle, normalizeTitleKey } from "../utils";
 
 export async function runScraperJob(
   sourceId: string,
@@ -124,11 +124,16 @@ export async function runScraperJob(
     // 3. Process each discovered article
     for (const item of itemsToProcess) {
       const normalizedOriginal = normalizeUrl(item.originalUrl);
+      const cleanCandidateTitle = cleanArticleTitle(item.title);
 
       // Check deduplication in ScrapedArticle
       const existingScraped = await prisma.scrapedArticle.findFirst({
         where: {
-          OR: [{ originalUrl: normalizedOriginal }, { canonicalUrl: normalizedOriginal }],
+          OR: [
+            { originalUrl: normalizedOriginal },
+            { canonicalUrl: normalizedOriginal },
+            ...(cleanCandidateTitle ? [{ title: cleanCandidateTitle }] : []),
+          ],
         },
       });
 
@@ -137,9 +142,14 @@ export async function runScraperJob(
         continue;
       }
 
-      // Check deduplication in Article
+      // Check deduplication in Article by URL OR Title
       const existingArticle = await prisma.article.findFirst({
-        where: { sourceUrl: normalizedOriginal },
+        where: {
+          OR: [
+            { sourceUrl: normalizedOriginal },
+            ...(cleanCandidateTitle ? [{ title: cleanCandidateTitle }] : []),
+          ],
+        },
       });
 
       if (existingArticle) {
@@ -157,7 +167,7 @@ export async function runScraperJob(
 
           articleData = {
             ...articleData,
-            title: extracted.title || articleData.title,
+            title: cleanArticleTitle(extracted.title || articleData.title),
             canonicalUrl: extracted.canonicalUrl || articleData.canonicalUrl,
             excerpt: extracted.excerpt || articleData.excerpt,
             extractedContent: extracted.extractedContent,
@@ -173,9 +183,25 @@ export async function runScraperJob(
         }
       }
 
+      articleData.title = cleanArticleTitle(articleData.title);
+
       if (!articleData.title) {
         failedCount++;
         await logMessage("WARN", `Bỏ qua bài không có tiêu đề: ${normalizedOriginal}`);
+        continue;
+      }
+
+      // Re-verify after title extraction
+      const reCheck = await prisma.article.findFirst({
+        where: {
+          OR: [
+            { sourceUrl: normalizedOriginal },
+            { title: articleData.title },
+          ],
+        },
+      });
+      if (reCheck) {
+        duplicateCount++;
         continue;
       }
 

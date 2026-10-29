@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { fetchRssFeed } from "./rssParser";
 import { normalizeUrl } from "./normalizer";
-import { slugify } from "@/lib/utils";
+import { slugify, cleanArticleTitle } from "@/lib/utils";
 import { safeFetch } from "@/lib/security";
 import { extractArticleFromHtml } from "./htmlParser";
 
@@ -63,10 +63,14 @@ export function checkAndTriggerAutoScrape() {
           // Check the latest 5 items from each feed
           for (const item of items.slice(0, 5)) {
             const normalizedUrl = normalizeUrl(item.originalUrl);
+            const cleanTitle = cleanArticleTitle(item.title);
 
             const existing = await prisma.article.findFirst({
               where: {
-                OR: [{ sourceUrl: normalizedUrl }, { title: item.title }],
+                OR: [
+                  { sourceUrl: normalizedUrl },
+                  { title: cleanTitle },
+                ],
               },
             });
 
@@ -95,16 +99,16 @@ export function checkAndTriggerAutoScrape() {
               fullContent = `<p class="lead">${item.excerpt || ""}</p>`;
             }
 
-            const uniqueSlug = `${slugify(item.title)}-${Date.now().toString().slice(-5)}${Math.floor(Math.random() * 100)}`;
+            const uniqueSlug = `${slugify(cleanTitle)}-${Date.now().toString().slice(-5)}${Math.floor(Math.random() * 100)}`;
 
             await prisma.article.create({
               data: {
-                title: item.title,
+                title: cleanTitle,
                 slug: uniqueSlug,
                 excerpt: fullExcerpt || `Tin tức thời sự từ ${feed.name}`,
                 content: fullContent,
                 featuredImage: fullImg,
-                imageCaption: item.title,
+                imageCaption: cleanTitle,
                 imageSource: "VnExpress",
                 categoryId,
                 status: "PUBLISHED",

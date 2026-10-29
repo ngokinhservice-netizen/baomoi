@@ -1,4 +1,25 @@
 import prisma from "./prisma";
+import { normalizeTitleKey } from "./utils";
+
+export function deduplicateArticles<T extends { id: string; title: string; sourceUrl?: string | null }>(articles: T[]): T[] {
+  const seenTitles = new Set<string>();
+  const seenUrls = new Set<string>();
+  const result: T[] = [];
+
+  for (const art of articles) {
+    const titleKey = normalizeTitleKey(art.title);
+    const urlKey = art.sourceUrl ? art.sourceUrl.split("?")[0].split("#")[0].toLowerCase() : "";
+
+    if (titleKey && seenTitles.has(titleKey)) continue;
+    if (urlKey && seenUrls.has(urlKey)) continue;
+
+    if (titleKey) seenTitles.add(titleKey);
+    if (urlKey) seenUrls.add(urlKey);
+    result.push(art);
+  }
+
+  return result;
+}
 
 export async function getCategories() {
   try {
@@ -21,14 +42,15 @@ export async function getFeaturedArticles(limit: number = 5) {
         author: { select: { name: true } },
       },
       orderBy: { publishedAt: "desc" },
-      take: limit,
+      take: limit * 2,
     });
 
-    if (featured.length >= limit) {
-      return featured;
+    const dedupedFeatured = deduplicateArticles(featured);
+    if (dedupedFeatured.length >= limit) {
+      return dedupedFeatured.slice(0, limit);
     }
 
-    const featuredIds = featured.map((a) => a.id);
+    const featuredIds = dedupedFeatured.map((a) => a.id);
     const fillers = await prisma.article.findMany({
       where: {
         status: "PUBLISHED",
@@ -39,10 +61,10 @@ export async function getFeaturedArticles(limit: number = 5) {
         author: { select: { name: true } },
       },
       orderBy: { publishedAt: "desc" },
-      take: limit - featured.length,
+      take: (limit - dedupedFeatured.length) * 2,
     });
 
-    return [...featured, ...fillers];
+    return deduplicateArticles([...dedupedFeatured, ...fillers]).slice(0, limit);
   } catch {
     return [];
   }
@@ -50,15 +72,16 @@ export async function getFeaturedArticles(limit: number = 5) {
 
 export async function getLatestArticles(limit: number = 10) {
   try {
-    return await prisma.article.findMany({
+    const raw = await prisma.article.findMany({
       where: { status: "PUBLISHED" },
       include: {
         category: { select: { id: true, name: true, slug: true } },
         author: { select: { name: true } },
       },
       orderBy: { publishedAt: "desc" },
-      take: limit,
+      take: limit * 2,
     });
+    return deduplicateArticles(raw).slice(0, limit);
   } catch {
     return [];
   }
@@ -66,15 +89,16 @@ export async function getLatestArticles(limit: number = 10) {
 
 export async function getMostReadArticles(limit: number = 5) {
   try {
-    return await prisma.article.findMany({
+    const raw = await prisma.article.findMany({
       where: { status: "PUBLISHED" },
       include: {
         category: { select: { id: true, name: true, slug: true } },
         author: { select: { name: true } },
       },
       orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
-      take: limit,
+      take: limit * 2,
     });
+    return deduplicateArticles(raw).slice(0, limit);
   } catch {
     return [];
   }
@@ -82,7 +106,7 @@ export async function getMostReadArticles(limit: number = 5) {
 
 export async function getArticlesByCategory(categorySlug: string, limit: number = 6) {
   try {
-    return await prisma.article.findMany({
+    const raw = await prisma.article.findMany({
       where: {
         status: "PUBLISHED",
         category: { slug: categorySlug },
@@ -92,8 +116,9 @@ export async function getArticlesByCategory(categorySlug: string, limit: number 
         author: { select: { name: true } },
       },
       orderBy: { publishedAt: "desc" },
-      take: limit,
+      take: limit * 2,
     });
+    return deduplicateArticles(raw).slice(0, limit);
   } catch {
     return [];
   }

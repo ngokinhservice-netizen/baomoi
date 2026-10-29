@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import { DiscoveredArticle } from "./types";
 import { normalizeUrl } from "./normalizer";
+import { cleanArticleTitle } from "../utils";
 
 /**
  * Extracts comprehensive article metadata and cleaned content from raw HTML
@@ -22,19 +23,20 @@ export function extractArticleFromHtml(
     }
   }
 
-  // 2. Title extraction: Custom selector -> OpenGraph -> Twitter -> Title tag -> h1
+  // 2. Title extraction: h1/twitter (cleanest) -> Custom selector -> OpenGraph -> Title tag
   let title = "";
   if (customSelectors?.title) {
     title = $(customSelectors.title).first().text().trim();
   }
   if (!title) {
     title =
-      $('meta[property="og:title"]').attr("content") ||
+      $("h1.title-detail, h1.title-news, h1").first().text().trim() ||
       $('meta[name="twitter:title"]').attr("content") ||
-      $("h1").first().text().trim() ||
+      $('meta[property="og:title"]').attr("content") ||
       $("title").text().split(/[|\-–]/)[0].trim() ||
       "";
   }
+  title = cleanArticleTitle(title);
 
   // 3. Excerpt / Description
   const excerpt =
