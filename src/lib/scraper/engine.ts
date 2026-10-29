@@ -252,7 +252,10 @@ export async function runScraperJob(
             sourceType: "CITATION",
             sourceUrl: normalizedOriginal,
             sourceName: source.name,
-            publishedAt: articleData.sourcePublishedAt || new Date(),
+            publishedAt:
+              articleData.sourcePublishedAt && articleData.sourcePublishedAt.getTime() <= Date.now()
+                ? articleData.sourcePublishedAt
+                : new Date(),
           },
         });
 
@@ -301,7 +304,10 @@ export async function runScraperJob(
             sourceType: "IMPORTED",
             sourceUrl: normalizedOriginal,
             sourceName: source.name,
-            publishedAt: articleData.sourcePublishedAt || new Date(),
+            publishedAt:
+              articleData.sourcePublishedAt && articleData.sourcePublishedAt.getTime() <= Date.now()
+                ? articleData.sourcePublishedAt
+                : new Date(),
           },
         });
 

@@ -84,6 +84,10 @@ export function formatRelativeTime(date: Date | string | number | null | undefin
   if (!date) return "";
   const d = new Date(date);
   if (isNaN(d.getTime())) return "";
+  const now = new Date();
+  if (d.getTime() > now.getTime()) {
+    return "Vừa xong";
+  }
   return formatDistanceToNow(d, { addSuffix: true, locale: vi });
 }
 

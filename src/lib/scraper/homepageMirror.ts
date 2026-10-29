@@ -232,16 +232,23 @@ export async function syncVnExpressHomepageMirror() {
     const fullImg = detail?.imageUrl || item.imageUrl || existing?.featuredImage;
     const fullContent = detail?.extractedContent || existing?.content || `<p class="lead">${item.excerpt || ""}</p>`;
     const fullExcerpt = detail?.excerpt || item.excerpt || existing?.excerpt || "Tin tức từ VnExpress";
-    const realPublishedAt = detail?.sourcePublishedAt || existing?.publishedAt || item.rssPublishedAt || new Date();
+    let realPublishedAt = detail?.sourcePublishedAt || existing?.publishedAt || item.rssPublishedAt || new Date();
+    if (realPublishedAt.getTime() > Date.now()) {
+      realPublishedAt = new Date();
+    }
 
     let articleId = existing?.id;
 
     if (existing) {
+      let finalPublishedAt = detail?.sourcePublishedAt || existing.publishedAt;
+      if (finalPublishedAt && finalPublishedAt.getTime() > Date.now()) {
+        finalPublishedAt = new Date();
+      }
       const updated = await prisma.article.update({
         where: { id: existing.id },
         data: {
           isFeatured: item.isFeatured,
-          publishedAt: detail?.sourcePublishedAt || existing.publishedAt,
+          publishedAt: finalPublishedAt,
           featuredImage: fullImg,
           content: fullContent,
           excerpt: fullExcerpt,
