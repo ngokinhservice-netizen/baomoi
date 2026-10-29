@@ -24,21 +24,19 @@ export default function Logo({
 
   const content = (
     <div className="flex items-center space-x-2.5 select-none group">
-      {/* Icon Badge: Panoramic Aperture / Globe with Orbit & Live Beacon */}
+      {/* Icon Badge: Heartbeat / Pulse Wave with Live Beacon */}
       <div className="relative flex-shrink-0">
         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300 border border-white/20">
-          {/* Panoramic Lens SVG */}
-          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" strokeOpacity="0.4" />
-            <ellipse cx="12" cy="12" rx="10" ry="4" strokeOpacity="0.7" />
-            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+          {/* Heartbeat / Activity Pulse Wave SVG */}
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
           </svg>
-          {/* 24h Live beacon dot */}
+          {/* 247 Live beacon dot */}
           <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-amber-400 rounded-full border-2 border-white animate-pulse" />
         </div>
       </div>
 
-      {/* Typography: TOÀN CẢNH 24H */}
+      {/* Typography: NHỊP SỐNG 247 */}
       <div className="flex flex-col">
         <div className="flex items-baseline space-x-1.5">
           <span
@@ -46,10 +44,10 @@ export default function Logo({
               isDark ? "text-white" : "text-gray-900"
             }`}
           >
-            TOÀN CẢNH
+            NHỊP SỐNG
           </span>
           <span className="bg-gradient-to-r from-red-600 to-red-700 text-white font-black text-sm sm:text-base px-2 py-0.5 rounded-md shadow-2xs tracking-wide">
-            24H
+            247
           </span>
         </div>
 
@@ -59,7 +57,7 @@ export default function Logo({
               isDark ? "text-red-400" : "text-primary"
             }`}
           >
-            Báo điện tử tin tức & phân tích
+            Báo điện tử tin tức & nhịp đập 24/7
           </span>
         )}
       </div>

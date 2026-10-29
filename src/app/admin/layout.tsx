@@ -186,7 +186,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="w-5 h-5" />
             </button>
             <h2 className="text-sm font-bold text-gray-800 hidden sm:block">
-              Hệ Thống Xuất Bản & Tự Động Hóa TOÀN CẢNH 24H
+              Hệ Thống Xuất Bản & Tự Động Hóa NHỊP SỐNG 247
             </h2>
           </div>
 

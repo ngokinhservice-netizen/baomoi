@@ -4,8 +4,8 @@ import { ChevronRight, ShieldCheck, FileText, Lock } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Chính sách & Quy định bản quyền | TOÀN CẢNH 24H",
-  description: "Chính sách biên tập, đạo đức báo chí và bảo vệ bản quyền tại TOÀN CẢNH 24H.",
+  title: "Chính sách & Quy định bản quyền | NHỊP SỐNG 247",
+  description: "Chính sách biên tập, đạo đức báo chí và bảo vệ bản quyền tại NHỊP SỐNG 247.",
 };
 
 export default function PolicyPage() {
@@ -31,7 +31,7 @@ export default function PolicyPage() {
             1. Tôn chỉ hoạt động và đạo đức báo chí
           </h2>
           <p className="text-gray-700 leading-relaxed text-sm">
-            TOÀN CẢNH 24H cam kết cung cấp thông tin trung thực, khách quan và đa chiều. Mọi tin tức xuất bản trên hệ thống đều tuân thủ chặt chẽ pháp luật báo chí, quy định an toàn thông tin mạng và quy chuẩn đạo đức nghề nghiệp.
+            NHỊP SỐNG 247 cam kết cung cấp thông tin trung thực, khách quan và đa chiều. Mọi tin tức xuất bản trên hệ thống đều tuân thủ chặt chẽ pháp luật báo chí, quy định an toàn thông tin mạng và quy chuẩn đạo đức nghề nghiệp.
           </p>
         </section>
 
@@ -57,7 +57,7 @@ export default function PolicyPage() {
             3. Chính sách bảo mật dữ liệu người dùng
           </h2>
           <p className="text-gray-700 leading-relaxed text-sm">
-            TOÀN CẢNH 24H bảo vệ tuyệt đối thông tin cá nhân của độc giả và người quản trị. Chúng tôi không chia sẻ thông tin cho bên thứ ba khi chưa có sự đồng thuận, trừ các trường hợp theo yêu cầu của cơ quan pháp luật có thẩm quyền.
+            NHỊP SỐNG 247 bảo vệ tuyệt đối thông tin cá nhân của độc giả và người quản trị. Chúng tôi không chia sẻ thông tin cho bên thứ ba khi chưa có sự đồng thuận, trừ các trường hợp theo yêu cầu của cơ quan pháp luật có thẩm quyền.
           </p>
         </section>
       </div>

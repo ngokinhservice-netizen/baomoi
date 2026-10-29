@@ -198,7 +198,7 @@ export default function ArticleCard({
           )}
         </div>
         <div className="flex items-center justify-between text-[11px] text-gray-400 pt-2 border-t border-gray-50">
-          <span>{article.sourceName || article.author?.name || "TOÀN CẢNH 24H"}</span>
+          <span>{article.sourceName || article.author?.name || "NHỊP SỐNG 247"}</span>
           <span className="flex items-center">
             <Clock className="w-3 h-3 mr-1" />
             {formatRelativeTime(dateToDisplay)}

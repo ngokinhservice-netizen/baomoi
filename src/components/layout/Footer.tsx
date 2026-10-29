@@ -15,9 +15,9 @@ export default function Footer() {
               Báo điện tử tin tức thời sự hàng đầu Việt Nam và Quốc tế. Cơ quan ngôn luận, xuất bản và phân tích thông tin đa chiều, nhanh chóng, chuẩn xác 24/7.
             </p>
             <div className="pt-2 text-xs text-gray-400 space-y-1">
-              <p>Tổng biên tập: <strong className="text-gray-200">Ban Biên Tập Toàn Cảnh 24h</strong></p>
+              <p>Tổng biên tập: <strong className="text-gray-200">Ban Biên Tập Nhịp Sống 247</strong></p>
               <p>Hotline: <strong className="text-gray-200">1900 8888 (24/7)</strong></p>
-              <p>Email: <strong className="text-gray-200">toasoan@toancanh24h.vn</strong></p>
+              <p>Email: <strong className="text-gray-200">toasoan@nhipsong247.vn</strong></p>
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export default function Footer() {
 
         {/* Bottom copyright & attribution */}
         <div className="pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
-          <p>© 2026 TOÀN CẢNH 24H. Bản quyền thuộc về Báo điện tử Toàn Cảnh 24h.</p>
+          <p>© 2026 NHỊP SỐNG 247. Bản quyền thuộc về Báo điện tử Nhịp Sống 247.</p>
           <p className="mt-2 md:mt-0">
             Mọi hành vi sao chép, trích dẫn phải tuân thủ quy định dẫn nguồn và điều khoản sử dụng.
           </p>

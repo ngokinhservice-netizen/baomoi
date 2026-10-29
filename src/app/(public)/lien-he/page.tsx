@@ -4,8 +4,8 @@ import { ChevronRight, Mail, Phone, MapPin, Send } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Liên hệ tòa soạn | TOÀN CẢNH 24H",
-  description: "Thông tin liên hệ tòa soạn, gửi bài cộng tác và đường dây nóng TOÀN CẢNH 24H.",
+  title: "Liên hệ tòa soạn | NHỊP SỐNG 247",
+  description: "Thông tin liên hệ tòa soạn, gửi bài cộng tác và đường dây nóng NHỊP SỐNG 247.",
 };
 
 export default function ContactPage() {
@@ -21,7 +21,7 @@ export default function ContactPage() {
         <div className="md:col-span-5 space-y-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-serif text-gray-900 mb-2">
-              Liên Hệ TOÀN CẢNH 24H
+              Liên Hệ NHỊP SỐNG 247
             </h1>
             <p className="text-sm text-gray-600">
               Mọi ý kiến đóng góp, tin tức độc giả cung cấp hoặc liên hệ phát hành vui lòng kết nối với chúng tôi.
@@ -49,7 +49,7 @@ export default function ContactPage() {
               <Mail className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-gray-900">Hòm thư điện tử:</p>
-                <p>toasoan@toancanh24h.io.vn / bandoc@toancanh24h.io.vn</p>
+                <p>toasoan@nhipsong247.vn / bandoc@nhipsong247.vn</p>
               </div>
             </div>
           </div>

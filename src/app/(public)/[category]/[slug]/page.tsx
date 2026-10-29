@@ -26,14 +26,14 @@ interface ArticlePageProps {
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const article = await getArticleBySlug(params.slug);
-  if (!article) return { title: "Không tìm thấy bài viết | TOÀN CẢNH 24H" };
+  if (!article) return { title: "Không tìm thấy bài viết | NHỊP SỐNG 247" };
 
   const title = article.seoTitle || article.title;
-  const description = article.seoDescription || article.excerpt || "Tin tức TOÀN CẢNH 24H";
+  const description = article.seoDescription || article.excerpt || "Tin tức NHỊP SỐNG 247";
   const url = `/${params.category}/${params.slug}`;
 
   return {
-    title: `${title} | TOÀN CẢNH 24H`,
+    title: `${title} | NHỊP SỐNG 247`,
     description,
     openGraph: {
       title,
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       type: "article",
       publishedTime: article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined,
       modifiedTime: article.updatedAt ? new Date(article.updatedAt).toISOString() : undefined,
-      authors: [article.author?.name || article.sourceName || "TOÀN CẢNH 24H"],
+      authors: [article.author?.name || article.sourceName || "NHỊP SỐNG 247"],
       images: article.featuredImage ? [{ url: article.featuredImage }] : [],
     },
     twitter: {
@@ -77,11 +77,11 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     dateModified: article.updatedAt ? new Date(article.updatedAt).toISOString() : new Date().toISOString(),
     author: {
       "@type": "Person",
-      name: article.author?.name || article.sourceName || "TOÀN CẢNH 24H",
+      name: article.author?.name || article.sourceName || "NHỊP SỐNG 247",
     },
     publisher: {
       "@type": "Organization",
-      name: "TOÀN CẢNH 24H",
+      name: "NHỊP SỐNG 247",
       logo: {
         "@type": "ImageObject",
         url: "http://localhost:3000/logo.svg",
@@ -139,7 +139,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             <div className="flex items-center space-x-4">
               <span className="flex items-center font-semibold text-gray-800">
                 <User className="w-3.5 h-3.5 mr-1 text-primary" />
-                {article.author?.name || article.sourceName || "TOÀN CẢNH 24H"}
+                {article.author?.name || article.sourceName || "NHỊP SỐNG 247"}
               </span>
               <span className="flex items-center text-gray-500">
                 <Clock className="w-3.5 h-3.5 mr-1 text-gray-400" />
@@ -225,10 +225,10 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             #{article.category.name}
           </Link>
           <Link
-            href="/search?q=MTK+NEWS"
+            href="/search?q=NHIP+SONG+247"
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition-colors"
           >
-            #MTK NEWS
+            #NHỊP SỐNG 247
           </Link>
         </div>
 

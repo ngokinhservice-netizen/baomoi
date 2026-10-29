@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
           <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/20">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-black font-sans uppercase tracking-tight">TOÀN CẢNH 24H</h1>
+          <h1 className="text-2xl font-black font-sans uppercase tracking-tight">NHỊP SỐNG 247</h1>
           <p className="text-xs text-red-100 mt-1 uppercase tracking-wider font-semibold">
             Hệ Thống Quản Trị Tòa Soạn Báo Điện Tử
           </p>

@@ -59,7 +59,7 @@ export default function Header({ categories = DEFAULT_CATEGORIES }: HeaderProps)
           <div className="flex items-center space-x-4">
             <span className="flex items-center text-gray-500 font-medium">
               <Clock className="w-3.5 h-3.5 mr-1 text-primary" />
-              {currentDate || "TOÀN CẢNH 24H — Cập nhật liên tục 24/7"}
+              {currentDate || "NHỊP SỐNG 247 — Cập nhật liên tục 24/7"}
             </span>
             <span className="text-gray-300">|</span>
             <div className="flex items-center space-x-2">

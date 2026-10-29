@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  const content = `# TOÀN CẢNH 24H Robots.txt
+  const content = `# NHỊP SỐNG 247 Robots.txt
 User-agent: *
 Allow: /
 Disallow: /admin

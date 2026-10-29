@@ -6,24 +6,24 @@ import path from "path";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Đang khởi tạo dữ liệu chuẩn cho TOÀN CẢNH 24H...");
+  console.log("🌱 Đang khởi tạo dữ liệu chuẩn cho NHỊP SỐNG 247...");
 
   // 1. Tạo tài khoản Quản trị viên & Biên tập viên
-  const adminPasswordHash = await bcrypt.hash("Admin@ToanCanh24hPassword!", 10);
+  const adminPasswordHash = await bcrypt.hash("Admin@NhipSong247Password!", 10);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@toancanh24h.io.vn" },
+    where: { email: "admin@nhipsong247.vn" },
     update: {},
     create: {
-      name: "Ban Biên Tập TOÀN CẢNH 24H",
-      email: "admin@toancanh24h.io.vn",
+      name: "Ban Biên Tập NHỊP SỐNG 247",
+      email: "admin@nhipsong247.vn",
       passwordHash: adminPasswordHash,
       role: "ADMIN",
       isActive: true,
     },
   });
 
-  console.log("✅ Đã tạo tài khoản quản trị TOÀN CẢNH 24H:");
-  console.log("   - Admin: admin@toancanh24h.io.vn / Admin@ToanCanh24hPassword!");
+  console.log("✅ Đã tạo tài khoản quản trị NHỊP SỐNG 247:");
+  console.log("   - Admin: admin@nhipsong247.vn / Admin@NhipSong247Password!");
 
   // 2. Tạo 8 danh mục báo chí chuẩn mực
   const categoriesData = [
@@ -153,12 +153,12 @@ async function main() {
     }
   }
 
-  // 5. Cấu hình Site Settings TOÀN CẢNH 24H
+  // 5. Cấu hình Site Settings NHỊP SỐNG 247
   const defaultSettings = [
-    { key: "siteName", value: "TOÀN CẢNH 24H" },
+    { key: "siteName", value: "NHỊP SỐNG 247" },
     { key: "siteDescription", value: "Báo điện tử tin tức thời sự hàng đầu Việt Nam và Quốc tế - Cập nhật liên tục 24/7" },
-    { key: "contactEmail", value: "toasoan@toancanh24h.io.vn" },
-    { key: "footerText", value: "© 2026 TOÀN CẢNH 24H. Cơ quan ngôn luận và xuất bản tin tức điện tử." },
+    { key: "contactEmail", value: "toasoan@nhipsong247.vn" },
+    { key: "footerText", value: "© 2026 NHỊP SỐNG 247. Cơ quan ngôn luận và xuất bản tin tức điện tử." },
     { key: "articlesPerPage", value: "12" },
   ];
 
@@ -169,7 +169,7 @@ async function main() {
       create: set,
     });
   }
-  console.log("✅ Đã khởi tạo cấu hình hệ thống TOÀN CẢNH 24H.");
+  console.log("✅ Đã khởi tạo cấu hình hệ thống NHỊP SỐNG 247.");
   console.log("🎉 Hoàn tất nạp dữ liệu hoàn chỉnh!");
 }
 

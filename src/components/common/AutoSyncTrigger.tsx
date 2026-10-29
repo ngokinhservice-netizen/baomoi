@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function AutoSyncTrigger() {
   useEffect(() => {
     try {
-      const STORAGE_KEY = "toancanh24h_last_auto_sync";
+      const STORAGE_KEY = "nhipsong247_last_auto_sync";
       const INTERVAL = 10 * 60 * 1000; // 10 phút
 
       const lastSync = localStorage.getItem(STORAGE_KEY);
@@ -21,7 +21,7 @@ export default function AutoSyncTrigger() {
         })
           .then((res) => {
             if (res.ok) {
-              console.log("[TOÀN CẢNH 24H] Đã cập nhật tin tức VnExpress mới nhất tự động.");
+              console.log("[NHỊP SỐNG 247] Đã cập nhật tin tức VnExpress mới nhất tự động.");
             }
           })
           .catch(() => {

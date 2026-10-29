@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     where: { slug: params.slug },
   });
 
-  if (!category) return { title: "Không tìm thấy chuyên mục | TOÀN CẢNH 24H" };
+  if (!category) return { title: "Không tìm thấy chuyên mục | NHỊP SỐNG 247" };
 
   return {
-    title: `${category.name} | TOÀN CẢNH 24H`,
-    description: category.description || `Tin tức thời sự chuyên mục ${category.name} trên TOÀN CẢNH 24H.`,
+    title: `${category.name} | NHỊP SỐNG 247`,
+    description: category.description || `Tin tức thời sự chuyên mục ${category.name} trên NHỊP SỐNG 247.`,
   };
 }
 

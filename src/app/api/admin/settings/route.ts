@@ -6,11 +6,11 @@ export async function GET() {
   try {
     const settings = await prisma.siteSetting.findMany();
     const settingsMap: Record<string, string> = {
-      siteName: "TOÀN CẢNH 24H",
-      siteDescription: "Báo điện tử tin tức thời sự hàng đầu Việt Nam và Quốc tế",
-      contactEmail: "toasoan@toancanh24h.vn",
-      logoText: "TOÀN CẢNH 24H",
-      footerText: "© 2026 TOÀN CẢNH 24H. Toàn bộ bản quyền thuộc về Báo điện tử Toàn Cảnh 24h.",
+      siteName: "NHỊP SỐNG 247",
+      siteDescription: "Báo điện tử tin tức thời sự hàng đầu Việt Nam và Quốc tế - Cập nhật liên tục 24/7",
+      contactEmail: "toasoan@nhipsong247.vn",
+      logoText: "NHỊP SỐNG 247",
+      footerText: "© 2026 NHỊP SỐNG 247. Toàn bộ bản quyền thuộc về Báo điện tử Nhịp Sống 247.",
       defaultScrapeMode: "EDITORIAL_QUEUE",
       enableAiAssistant: "true",
       articlesPerPage: "12",
